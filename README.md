@@ -11,9 +11,9 @@ Planned Features (so far):
 - GUI
 - Scheduling of Pythonscripts
 <br><br>
+
 Limitations:
 - Unknown for now
-<br>
 
 ## Previews
 First Itereation of the Main GUI
