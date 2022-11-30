@@ -14,8 +14,10 @@ Planned Features (so far):
 Limitations:
 - Unknown for now
 <br>
+
 ## Previews
 First Itereation of the Main GUI
+<br>
 ![First Main GUI Iteration](GUI-Sketch/GarryCron.drawio.png)
 <br>
 First Iteration of the Add GUI (Edit probably the same just with a different title and the Path already set.)
