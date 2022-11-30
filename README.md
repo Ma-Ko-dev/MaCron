@@ -16,7 +16,7 @@ Limitations:
 - Unknown for now
 
 ## Previews
-First Itereation of the Main GUI
+First Iteration of the Main GUI (Mockup made with [draw.io](http://www.draw.io))
 <br>
 ![First Main GUI Iteration](GUI-Sketch/GarryCron.drawio.png)
 <br>
