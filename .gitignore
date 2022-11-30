@@ -159,3 +159,4 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 /GUI-Sketch/GarryCron.drawio
+/GUI-Sketch/GarryCronAdd.drawio
