@@ -16,6 +16,10 @@ Limitations:
 - Unknown for now
 
 ## Previews
+This is the first test GUI with QT.
+<br>
+![First QT GUI Preview](GUI-Sketch/QT-preview.PNG)
+<br>
 First Iteration of the Main GUI (Mockup made with [draw.io](http://www.draw.io))
 <br>
 ![First Main GUI Iteration](GUI-Sketch/GarryCron.drawio.png)
