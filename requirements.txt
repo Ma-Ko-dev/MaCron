@@ -1,2 +1,3 @@
 PyQt5>=5.15.7
 customtkinter>=5.0.1
+QDarkStyle>=3.1
