@@ -16,6 +16,9 @@ Limitations:
 - Unknown for now
 
 ## Previews
+Latest Version of the GUI with QT. So far i am happy with it. I also changed the name because i am a comedy genius.
+<br>
+![Another GUI Preview with QT](GUI-Sketch/QT-Preview-2.PNG)
 This is the first test GUI with QT.
 <br>
 ![First QT GUI Preview](GUI-Sketch/QT-preview.PNG)
