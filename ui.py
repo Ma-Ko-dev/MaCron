@@ -1,4 +1,5 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QMainWindow
 
 
@@ -41,7 +42,7 @@ class UiMainWindow(QMainWindow):
         self.btn_add_script.setMinimumSize(QtCore.QSize(130, 30))
         self.btn_add_script.setMaximumSize(QtCore.QSize(130, 30))
         self.btn_add_script.setFont(font)
-        self.btn_add_script.setObjectName("pushButton")
+        self.btn_add_script.setObjectName("btn_add_script")
         self.btn_add_script.setText("Add new Script")
         self.gridLayout.addWidget(self.btn_add_script, 0, 0, 1, 1)
 
@@ -54,10 +55,9 @@ class UiMainWindow(QMainWindow):
         self.label_script = QtWidgets.QLabel(self.scrollAreaWidgetContents)
         self.label_script.setMinimumSize(QtCore.QSize(600, 30))
         self.label_script.setMaximumSize(QtCore.QSize(16777215, 30))
-
         self.label_script.setFont(font)
         self.label_script.setStyleSheet("")
-        self.label_script.setObjectName("label")
+        self.label_script.setObjectName("label_script")
         self.label_script.setText("ThisIsAPythonScriptAndBecomeVeryLongSinceItsAlsoThePathOrIImplementANameInstead.py")
         self.gridLayout.addWidget(self.label_script, 2, 0, 1, 1)
 
@@ -66,7 +66,7 @@ class UiMainWindow(QMainWindow):
         self.label_time.setMaximumSize(QtCore.QSize(120, 30))
         self.label_time.setFont(font)
         self.label_time.setAlignment(QtCore.Qt.AlignCenter)
-        self.label_time.setObjectName("label_2")
+        self.label_time.setObjectName("label_time")
         self.label_time.setText("00:00:00:00")
         self.gridLayout.addWidget(self.label_time, 2, 1, 1, 1)
 
@@ -74,7 +74,7 @@ class UiMainWindow(QMainWindow):
         self.btn_run.setMinimumSize(QtCore.QSize(130, 30))
         self.btn_run.setMaximumSize(QtCore.QSize(16777215, 30))
         self.btn_run.setFont(font)
-        self.btn_run.setObjectName("pushButton_2")
+        self.btn_run.setObjectName("btn_run")
         self.btn_run.setText("Run now")
         self.gridLayout.addWidget(self.btn_run, 2, 2, 1, 1)
 
@@ -82,7 +82,7 @@ class UiMainWindow(QMainWindow):
         self.btn_edit.setMinimumSize(QtCore.QSize(130, 30))
         self.btn_edit.setMaximumSize(QtCore.QSize(16777215, 30))
         self.btn_edit.setFont(font)
-        self.btn_edit.setObjectName("pushButton_3")
+        self.btn_edit.setObjectName("btn_edit")
         self.btn_edit.setText("Edit")
         self.gridLayout.addWidget(self.btn_edit, 2, 3, 1, 1)
 
@@ -90,7 +90,7 @@ class UiMainWindow(QMainWindow):
         self.btn_delete.setMinimumSize(QtCore.QSize(130, 30))
         self.btn_delete.setMaximumSize(QtCore.QSize(16777215, 30))
         self.btn_delete.setFont(font)
-        self.btn_delete.setObjectName("pushButton_4")
+        self.btn_delete.setObjectName("btn_delete")
         self.btn_delete.setText("Delete")
         self.gridLayout.addWidget(self.btn_delete, 2, 4, 1, 1)
 
@@ -110,17 +110,15 @@ class UiMainWindow(QMainWindow):
         self.menuMenu.setTitle("Menu")
         self.setMenuBar(self.menubar)
 
-        self.actionAdd_Script = QtWidgets.QAction(self)
+        self.actionAdd_Script = QtWidgets.QAction(QIcon("assets/plus-button.png"), "Add Script", self)
         self.actionAdd_Script.setObjectName("actionAdd_new_Script")
-        self.actionAdd_Script.setText("Add Script")
 
-        self.actionCheck_Updates = QtWidgets.QAction(self)
+        self.actionCheck_Updates = QtWidgets.QAction(QIcon("assets/compile.png"), "Check for Updates",  self)
         self.actionCheck_Updates.setObjectName("actionCheck_for_Updates")
-        self.actionCheck_Updates.setText("Check for Updates")
 
-        self.actionQuit = QtWidgets.QAction(self)
+        self.actionQuit = QtWidgets.QAction(QIcon("assets/cross-circle.png"), "Quit", self)
         self.actionQuit.setObjectName("actionQuit")
-        self.actionQuit.setText("Quit")
+        self.actionQuit.triggered.connect(self.clicked)
 
         self.menuMenu.addAction(self.actionAdd_Script)
         self.menuMenu.addAction(self.actionCheck_Updates)
@@ -129,3 +127,8 @@ class UiMainWindow(QMainWindow):
         self.menubar.addAction(self.menuMenu.menuAction())
 
         QtCore.QMetaObject.connectSlotsByName(self)
+
+    def clicked(self):
+        print("Lets exit")
+        self.close()
+
