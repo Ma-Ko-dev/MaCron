@@ -3,6 +3,11 @@ import qdarkstyle
 from PyQt5.QtWidgets import QApplication
 from ui import UiMainWindow
 
+
+def add_macroni():
+    pass
+
+
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     MainWindow = UiMainWindow()

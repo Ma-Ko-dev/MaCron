@@ -129,6 +129,5 @@ class UiMainWindow(QMainWindow):
         QtCore.QMetaObject.connectSlotsByName(self)
 
     def clicked(self):
-        print("Lets exit")
         self.close()
 
