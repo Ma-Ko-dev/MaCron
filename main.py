@@ -1,8 +1,8 @@
 import datetime
 import sys
 import time
-
 import qdarkstyle
+import logging
 from subprocess import call
 from sqlalchemy import Column, Integer, String, Float, create_engine
 from sqlalchemy.orm import declarative_base, Session
@@ -11,6 +11,10 @@ from ui import UiMainWindow
 
 base = declarative_base()
 engine = create_engine("sqlite:///database.db")
+# logging setup
+logging.basicConfig(level=logging.DEBUG,
+                    format="%(asctime)s|%(levelname)s|%(funcName)s|%(message)s",
+                    datefmt="%d.%m.%Y-%H:%M:%S")
 
 class Macroni(base):
     __tablename__ = "macronis"
@@ -43,7 +47,8 @@ def run_macroni():
         macronis = session.query(Macroni).all()
         for macroni in macronis:
             if datetime.datetime.now().timestamp() > macroni.next_run:
-                print(f"[DEBUG][{macroni.name}][{macroni.id}][{datetime.datetime.now().time()}]: i run now")
+                # print(f"[DEBUG][{macroni.name}][{macroni.id}][{datetime.datetime.now().time()}]: i run now")
+                logging.debug(f"Scriptname: {macroni.name} - ID: {macroni.id}")
                 call(["python", macroni.path])
                 reset_next_run(macroni.id, macroni.interval)
         wait_timer()
