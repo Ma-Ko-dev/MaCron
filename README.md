@@ -4,7 +4,7 @@ This tool lets you run and Schedule your Python Scripts right from your PC.
 <br>
 __This is a Work in Progress.__
 <br>
-Status: Planning phase
+Status: Prototyping
 <br>
 <br>
 Planned Features (so far):
