@@ -39,18 +39,31 @@ def add_macroni(name: str, interval: int) -> None:
 
 
 def run_macroni():
-    macronis = Session(engine).query(Macroni).all()
-    while True:
+    with Session(engine) as session:
+        macronis = session.query(Macroni).all()
         for macroni in macronis:
             if datetime.datetime.now().timestamp() > macroni.next_run:
-                # print(f"{macroni.name}: i run now")
+                print(f"[DEBUG][{macroni.name}][{macroni.id}][{datetime.datetime.now().time()}]: i run now")
                 call(["python", macroni.path])
-            # else:
-            #     print(f"{macroni.name}: i dont run now")
-        time.sleep(1)
+                reset_next_run(macroni.id, macroni.interval)
+        wait_timer()
 
 
+def reset_next_run(macroni_id, interval):
+    new_run = datetime.datetime.now() + datetime.timedelta(seconds=interval)
+    with Session(engine) as session:
 
+        session.query(Macroni).filter(Macroni.id == macroni_id).update(
+            {
+                Macroni.next_run: new_run.timestamp()
+            }
+        )
+        session.commit()
+
+
+def wait_timer():
+    time.sleep(1)
+    run_macroni()
 
 
 def path_picker():
@@ -68,7 +81,7 @@ if __name__ == "__main__":
     # app.setStyleSheet(qdarkstyle.load_stylesheet_pyqt5())
     base.metadata.create_all(engine)
 
-    # add_macroni(name="My first Script", interval=30)
+    # add_macroni(name="My second Script", interval=30)
 
     run_macroni()
 
