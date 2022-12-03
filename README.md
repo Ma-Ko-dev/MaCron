@@ -1,6 +1,8 @@
 # MaCron
 This tool lets you run and Schedule your Python Scripts right from your PC.
 <br>
+Check out the Flowchart folder for some more or less useful Flowcharts.
+<br>
 <br>
 __This is a Work in Progress.__
 <br>
