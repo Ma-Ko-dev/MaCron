@@ -3,10 +3,11 @@ import time
 import qdarkstyle
 import logging
 from subprocess import call
+
 from sqlalchemy import Column, Integer, String, Float, create_engine
 from sqlalchemy.orm import declarative_base, Session
 from PyQt5 import QtWidgets
-from UI.mainWindow import Ui_MainWindow
+from UI import mainWindow, entryWidget
 
 # db setup
 base = declarative_base()
@@ -29,9 +30,29 @@ class Macroni(base):
 class MainWindow(QtWidgets.QMainWindow):
     def __init__(self, *args, **kwargs):
         super(MainWindow, self).__init__(*args, **kwargs)
-        self.ui = Ui_MainWindow()
+        self.ui = mainWindow.Ui_MainWindow()
         self.ui.setupUi(self)
+        self.add_widget()
 
+        self.ui.btn_delete.clicked.connect(self.exit)
+
+    def exit(self):
+        # example only
+        print("i want to exit")
+
+    def add_widget(self):
+        entry = EntryWidget()
+        entry2 = EntryWidget()
+
+        self.ui.gridLayout.addWidget(entry, 3, 0)
+        self.ui.gridLayout.addWidget(entry2, 4, 0)
+
+
+class EntryWidget(QtWidgets.QWidget):
+    def __init__(self, *args, **kwargs):
+        super(EntryWidget, self).__init__(*args, **kwargs)
+        self.entry_ui = entryWidget.Ui_Form()
+        self.entry_ui.setupUi(self)
 
 
 def add_macroni(name: str, interval: int) -> None:
