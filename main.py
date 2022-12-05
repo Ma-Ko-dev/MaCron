@@ -1,14 +1,14 @@
 import datetime
-import sys
 import time
 import qdarkstyle
 import logging
 from subprocess import call
 from sqlalchemy import Column, Integer, String, Float, create_engine
 from sqlalchemy.orm import declarative_base, Session
-from PyQt5.QtWidgets import QApplication
-from ui import UiMainWindow
+from PyQt5 import QtWidgets
+from UI.mainWindow import Ui_MainWindow
 
+# db setup
 base = declarative_base()
 engine = create_engine("sqlite:///database.db")
 # logging setup
@@ -24,6 +24,14 @@ class Macroni(base):
     path = Column(String(100), nullable=False)
     interval = Column(Float, nullable=False)
     next_run = Column(Float, nullable=False)
+
+
+class MainWindow(QtWidgets.QMainWindow):
+    def __init__(self, *args, **kwargs):
+        super(MainWindow, self).__init__(*args, **kwargs)
+        self.ui = Ui_MainWindow()
+        self.ui.setupUi(self)
+
 
 
 def add_macroni(name: str, interval: int) -> None:
@@ -81,16 +89,13 @@ def path_picker():
 
 
 if __name__ == "__main__":
-    # app = QApplication(sys.argv)
-    # MainWindow = UiMainWindow()
-    # app.setStyleSheet(qdarkstyle.load_stylesheet_pyqt5())
-    base.metadata.create_all(engine)
+    app = QtWidgets.QApplication([])
+    mainWin = MainWindow()
+    app.setStyleSheet(qdarkstyle.load_stylesheet_pyqt5())
 
+    # base.metadata.create_all(engine)
     # add_macroni(name="My second Script", interval=30)
+    # run_macroni()
 
-    run_macroni()
-
-    # print(datetime.datetime.now().timestamp())
-
-    # MainWindow.show()
-    # sys.exit(app.exec_())
+    mainWin.show()
+    app.exec()
