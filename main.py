@@ -7,7 +7,7 @@ from subprocess import call
 from sqlalchemy import Column, Integer, String, Float, create_engine
 from sqlalchemy.orm import declarative_base, Session
 from PyQt5 import QtWidgets
-from UI import mainWindow, entryWidget
+from UI import mainWindow, entryWidget, entryWidgetV2, mainWindowV3
 
 # db setup
 base = declarative_base()
@@ -30,11 +30,11 @@ class Macroni(base):
 class MainWindow(QtWidgets.QMainWindow):
     def __init__(self, *args, **kwargs):
         super(MainWindow, self).__init__(*args, **kwargs)
-        self.ui = mainWindow.Ui_MainWindow()
+        self.ui = mainWindowV3.Ui_MainWindow()
         self.ui.setupUi(self)
         self.add_widget()
 
-        self.ui.btn_delete.clicked.connect(self.exit)
+        # self.ui.btn_delete.clicked.connect(self.exit)
 
     def exit(self):
         # example only
@@ -44,14 +44,22 @@ class MainWindow(QtWidgets.QMainWindow):
         entry = EntryWidget()
         entry2 = EntryWidget()
 
-        self.ui.gridLayout.addWidget(entry, 3, 0)
-        self.ui.gridLayout.addWidget(entry2, 4, 0)
+        # self.ui.gridLayout.removeWidget(self.ui.gridLayout.spacerItem())
+
+        self.ui.gridLayout.addWidget(entry, 0, 0)
+        self.ui.gridLayout.addWidget(entry2, 1, 0)
+
+        # spacer = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
+        # self.ui.gridLayout.addWidget(spacer, 2, 0)
+
+        # spacerItem = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
+        # self.ui.gridLayout.addItem(spacerItem, 0, 0, 1, 1)
 
 
 class EntryWidget(QtWidgets.QWidget):
     def __init__(self, *args, **kwargs):
         super(EntryWidget, self).__init__(*args, **kwargs)
-        self.entry_ui = entryWidget.Ui_Form()
+        self.entry_ui = entryWidgetV2.Ui_Form()
         self.entry_ui.setupUi(self)
 
 
