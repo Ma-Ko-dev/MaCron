@@ -5,10 +5,10 @@ import qdarkstyle
 import logging
 from subprocess import call
 
-from sqlalchemy import Column, Integer, String, Float, create_engine, func
+from sqlalchemy import Column, Integer, String, Float, create_engine
 from sqlalchemy.orm import declarative_base, Session
-from PyQt5 import QtWidgets
-from UI import entryWidget, mainWindow
+from PyQt5 import QtWidgets, QtCore
+from UI import entryWidget, mainWindow, addDialog
 
 # db setup
 base = declarative_base()
@@ -35,14 +35,24 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui = mainWindow.Ui_MainWindow()
         self.ui.setupUi(self)
 
+        # adding entries to GUI
         self.add_entries()
 
-        self.ui.menu_action_exit.triggered.connect(self.exit)
+        # sub window
+        self.sub_window = AddDialog()
 
-    def exit(self):
+        # Menu trigger
+        self.ui.menu_action_exit.triggered.connect(self.exit)
+        self.ui.menu_action_add.triggered.connect(self.sub_window.show)
+        # Button clicked
+        self.ui.btn_addScript.clicked.connect(self.sub_window.show)
+
+    def exit(self) -> None:
+        """This method will simply close the program."""
         sys.exit()
 
-    def add_entries(self):
+    def add_entries(self) -> None:
+        """When this method is called, it will read all entries in the database and add it to the GUI."""
         row = 0
         with Session(engine) as session:
             macronis = session.query(Macroni).all()
@@ -54,7 +64,18 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.ui.gridLayout.addWidget(entry, row, 0)
 
 
+class AddDialog(QtWidgets.QDialog):
+    def __init__(self, *args, **kwargs):
+        super(AddDialog, self).__init__(*args, **kwargs)
+        self.add_dialog = addDialog.Ui_Dialog()
+        self.add_dialog.setupUi(self)
+        # remove the question mark and keep the dialog on top
+        self.setWindowFlags(self.windowFlags() ^ QtCore.Qt.WindowContextHelpButtonHint)
+        self.setWindowFlags(self.windowFlags() ^ QtCore.Qt.WindowStaysOnTopHint)
+
+
 class EntryWidget(QtWidgets.QWidget):
+    """This Class acts as the entry for the main GUI"""
     def __init__(self, *args, **kwargs):
         super(EntryWidget, self).__init__(*args, **kwargs)
         self.entry_ui = entryWidget.Ui_Form()
