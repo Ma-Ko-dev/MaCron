@@ -7,7 +7,7 @@ from subprocess import call
 
 from sqlalchemy import Column, Integer, String, Float, create_engine
 from sqlalchemy.orm import declarative_base, Session
-from PyQt5 import QtWidgets, QtCore
+from PyQt5 import QtWidgets, QtCore, QtGui
 from UI import entryWidget, mainWindow, addDialog
 
 # db setup
@@ -36,22 +36,21 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.setupUi(self)
 
         # adding entries to GUI
-        self.add_entries()
+        self.add_entries_to_gui()
 
         # sub window
         self.sub_window = AddDialog()
 
         # Menu trigger
         self.ui.menu_action_exit.triggered.connect(self.exit)
-        self.ui.menu_action_add.triggered.connect(self.sub_window.show)
+        self.ui.menu_action_add.triggered.connect(self.open_dialog)
         # Button clicked
-        self.ui.btn_addScript.clicked.connect(self.sub_window.show)
+        self.ui.btn_addScript.clicked.connect(self.open_dialog)
 
-    def exit(self) -> None:
-        """This method will simply close the program."""
-        sys.exit()
+    def open_dialog(self):
+        self.sub_window.exec_()
 
-    def add_entries(self) -> None:
+    def add_entries_to_gui(self) -> None:
         """When this method is called, it will read all entries in the database and add it to the GUI."""
         row = 0
         with Session(engine) as session:
@@ -63,6 +62,10 @@ class MainWindow(QtWidgets.QMainWindow):
                 row += 1
                 self.ui.gridLayout.addWidget(entry, row, 0)
 
+    def exit(self) -> None:
+        """This method will simply close the program."""
+        sys.exit()
+
 
 class AddDialog(QtWidgets.QDialog):
     def __init__(self, *args, **kwargs):
@@ -71,7 +74,60 @@ class AddDialog(QtWidgets.QDialog):
         self.add_dialog.setupUi(self)
         # remove the question mark and keep the dialog on top
         self.setWindowFlags(self.windowFlags() ^ QtCore.Qt.WindowContextHelpButtonHint)
-        self.setWindowFlags(self.windowFlags() ^ QtCore.Qt.WindowStaysOnTopHint)
+        # self.setWindowFlags(self.windowFlags() ^ QtCore.Qt.WindowStaysOnTopHint)
+        self.setWindowFlags(self.windowFlags() ^ QtCore.Qt.WindowCloseButtonHint)
+
+        # button events
+        self.add_dialog.btn_cancel.clicked.connect(self.cancel_dialog)
+        self.add_dialog.btn_select.clicked.connect(self.select_script)
+        self.add_dialog.btn_add.clicked.connect(self.add_to_db)
+
+    def cancel_dialog(self):
+        self.close()
+
+    def select_script(self):
+        path_name = QtWidgets.QFileDialog.getOpenFileName(self, "Select Script", "c:\\", "Python files (*.py)")
+        self.add_dialog.edit_path.setText(path_name[0])
+
+    def add_to_db(self):
+        # TODO: Clean up and move some of this in extra functions
+        path = self.add_dialog.edit_path.text()
+        name = self.add_dialog.edit_name.text()
+        interval = 60
+        if path and name:
+            print("added, closing")
+            # print(f"{path} and {name}")
+            with Session(engine) as session:
+                macroni = Macroni()
+                macroni.name = name
+                macroni.path = path
+                # INFO: we need to calculate the interval here in seconds or when we get the data from the add gui,
+                # we already get it in seconds.
+                macroni.interval = interval
+                # calculate when the next run is according to current dateTime.now().timestamp() plus interval
+                new_run = datetime.datetime.now() + datetime.timedelta(seconds=interval)
+                macroni.next_run = new_run.timestamp()
+
+                session.add_all([macroni])
+                session.commit()
+            # TODO: See if i need a separate update method to maybe wipe all entries because i suspect at the moment
+            #  this will currently add some of the entries over old entries.
+            mainWin.add_entries_to_gui()
+            self.close()
+        else:
+            icon = QtGui.QIcon()
+            icon.addPixmap(QtGui.QPixmap(":/icons/assets/icons/macaron_flaticon-com.ico"))
+
+            msg = QtWidgets.QMessageBox()
+            msg.setWindowIcon(icon)
+            msg.setIcon(QtWidgets.QMessageBox.Critical)
+            msg.setText("All fields are mandatory to fill! See details for more Information.")
+            msg.setDetailedText("See below for more Information:\n"
+                                "The Path has to be filled with a valid Path.\n"
+                                "The Name field has to be at least 6 chars long.")
+            msg.setWindowTitle("ERROR")
+            msg.setStandardButtons(QtWidgets.QMessageBox.Ok)
+            msg.exec_()
 
 
 class EntryWidget(QtWidgets.QWidget):
@@ -86,7 +142,7 @@ def add_macroni(name: str, interval: int) -> None:
     with Session(engine) as session:
         macroni = Macroni()
         macroni.name = name
-        macroni.path = path_picker()
+        # macroni.path = path_picker()
         # INFO: we need to calculate the interval here in seconds or when we get the data from the add gui, we already
         #  get it in seconds.
         macroni.interval = interval
@@ -127,13 +183,13 @@ def wait_timer():
     run_macroni()
 
 
-def path_picker():
-    from tkinter import Tk
-    from tkinter.filedialog import askopenfilename
-
-    Tk().withdraw()
-    filename = askopenfilename()
-    return filename
+# def path_picker():
+#     from tkinter import Tk
+#     from tkinter.filedialog import askopenfilename
+#
+#     Tk().withdraw()
+#     filename = askopenfilename()
+#     return filename
 
 
 if __name__ == "__main__":
