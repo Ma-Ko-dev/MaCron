@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'MaCron-MainWindowV3.ui'
+# Form implementation generated from reading ui file 'MaCron-MainWindow.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.7
 #
@@ -92,7 +92,7 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "GarryCron"))
+        MainWindow.setWindowTitle(_translate("MainWindow", "MaCron"))
         self.pushButton.setText(_translate("MainWindow", "Add new Script"))
         self.menuMenu.setTitle(_translate("MainWindow", "Menu"))
         self.menu_action_add.setText(_translate("MainWindow", "Add new Script"))

@@ -1,10 +1,11 @@
 import datetime
+import sys
 import time
 import qdarkstyle
 import logging
 from subprocess import call
 
-from sqlalchemy import Column, Integer, String, Float, create_engine
+from sqlalchemy import Column, Integer, String, Float, create_engine, func
 from sqlalchemy.orm import declarative_base, Session
 from PyQt5 import QtWidgets
 from UI import entryWidget, mainWindow
@@ -33,18 +34,24 @@ class MainWindow(QtWidgets.QMainWindow):
         super(MainWindow, self).__init__(*args, **kwargs)
         self.ui = mainWindow.Ui_MainWindow()
         self.ui.setupUi(self)
-        for i in range(0, 30):
-            self.add_widget(i)
 
-        # self.ui.btn_delete.clicked.connect(self.exit)
+        self.add_entries()
+
+        self.ui.menu_action_exit.triggered.connect(self.exit)
 
     def exit(self):
-        # example only
-        print("i want to exit")
+        sys.exit()
 
-    def add_widget(self, row):
-        entry = EntryWidget()
-        self.ui.gridLayout.addWidget(entry, row, 0)
+    def add_entries(self):
+        row = 0
+        with Session(engine) as session:
+            macronis = session.query(Macroni).all()
+            for macroni in macronis:
+                entry = EntryWidget()
+                entry.entry_ui.lbl_name.setText(macroni.name)
+                entry.entry_ui.lbl_interval.setText(str(macroni.interval))
+                row += 1
+                self.ui.gridLayout.addWidget(entry, row, 0)
 
 
 class EntryWidget(QtWidgets.QWidget):

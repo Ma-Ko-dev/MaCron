@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'MaCron-EntryWidgetV2.ui'
+# Form implementation generated from reading ui file 'MaCron-EntryWidget.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.7
 #
@@ -23,7 +23,7 @@ class Ui_Form(object):
         self.gridLayout.setObjectName("gridLayout")
         self.lbl_interval = QtWidgets.QLabel(Form)
         self.lbl_interval.setMinimumSize(QtCore.QSize(110, 30))
-        self.lbl_interval.setMaximumSize(QtCore.QSize(120, 30))
+        self.lbl_interval.setMaximumSize(QtCore.QSize(150, 30))
         font = QtGui.QFont()
         font.setPointSize(12)
         self.lbl_interval.setFont(font)
@@ -32,7 +32,7 @@ class Ui_Form(object):
         self.gridLayout.addWidget(self.lbl_interval, 0, 1, 1, 1)
         self.btn_delete = QtWidgets.QPushButton(Form)
         self.btn_delete.setMinimumSize(QtCore.QSize(0, 30))
-        self.btn_delete.setMaximumSize(QtCore.QSize(16777215, 30))
+        self.btn_delete.setMaximumSize(QtCore.QSize(200, 30))
         font = QtGui.QFont()
         font.setPointSize(11)
         self.btn_delete.setFont(font)
@@ -40,7 +40,7 @@ class Ui_Form(object):
         self.gridLayout.addWidget(self.btn_delete, 0, 3, 1, 1)
         self.btn_edit = QtWidgets.QPushButton(Form)
         self.btn_edit.setMinimumSize(QtCore.QSize(0, 30))
-        self.btn_edit.setMaximumSize(QtCore.QSize(16777215, 30))
+        self.btn_edit.setMaximumSize(QtCore.QSize(200, 30))
         font = QtGui.QFont()
         font.setPointSize(11)
         self.btn_edit.setFont(font)
@@ -57,7 +57,7 @@ class Ui_Form(object):
         self.gridLayout.addWidget(self.lbl_name, 0, 0, 1, 1)
         self.btn_run = QtWidgets.QPushButton(Form)
         self.btn_run.setMinimumSize(QtCore.QSize(0, 30))
-        self.btn_run.setMaximumSize(QtCore.QSize(16777215, 30))
+        self.btn_run.setMaximumSize(QtCore.QSize(200, 30))
         font = QtGui.QFont()
         font.setPointSize(11)
         self.btn_run.setFont(font)
@@ -72,7 +72,7 @@ class Ui_Form(object):
         _translate = QtCore.QCoreApplication.translate
         Form.setWindowTitle(_translate("Form", "Form"))
         self.lbl_interval.setText(_translate("Form", "00:00:00:00"))
-        self.btn_delete.setText(_translate("Form", "Delete"))
-        self.btn_edit.setText(_translate("Form", "Edit"))
+        self.btn_delete.setText(_translate("Form", "Edit"))
+        self.btn_edit.setText(_translate("Form", "Delete"))
         self.lbl_name.setText(_translate("Form", "ThisIsAPythonScriptpy"))
         self.btn_run.setText(_translate("Form", "Run now"))
