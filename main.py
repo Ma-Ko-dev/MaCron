@@ -7,7 +7,7 @@ from subprocess import call
 from sqlalchemy import Column, Integer, String, Float, create_engine
 from sqlalchemy.orm import declarative_base, Session
 from PyQt5 import QtWidgets
-from UI import mainWindow, entryWidget, entryWidgetV2, mainWindowV3
+from UI import entryWidget, mainWindow
 
 # db setup
 base = declarative_base()
@@ -16,6 +16,7 @@ engine = create_engine("sqlite:///database.db")
 logging.basicConfig(level=logging.DEBUG,
                     format="%(asctime)s|%(levelname)s|%(funcName)s|%(message)s",
                     datefmt="%d.%m.%Y-%H:%M:%S")
+
 
 class Macroni(base):
     __tablename__ = "macronis"
@@ -30,9 +31,10 @@ class Macroni(base):
 class MainWindow(QtWidgets.QMainWindow):
     def __init__(self, *args, **kwargs):
         super(MainWindow, self).__init__(*args, **kwargs)
-        self.ui = mainWindowV3.Ui_MainWindow()
+        self.ui = mainWindow.Ui_MainWindow()
         self.ui.setupUi(self)
-        self.add_widget()
+        for i in range(0, 30):
+            self.add_widget(i)
 
         # self.ui.btn_delete.clicked.connect(self.exit)
 
@@ -40,26 +42,15 @@ class MainWindow(QtWidgets.QMainWindow):
         # example only
         print("i want to exit")
 
-    def add_widget(self):
+    def add_widget(self, row):
         entry = EntryWidget()
-        entry2 = EntryWidget()
-
-        # self.ui.gridLayout.removeWidget(self.ui.gridLayout.spacerItem())
-
-        self.ui.gridLayout.addWidget(entry, 0, 0)
-        self.ui.gridLayout.addWidget(entry2, 1, 0)
-
-        # spacer = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
-        # self.ui.gridLayout.addWidget(spacer, 2, 0)
-
-        # spacerItem = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
-        # self.ui.gridLayout.addItem(spacerItem, 0, 0, 1, 1)
+        self.ui.gridLayout.addWidget(entry, row, 0)
 
 
 class EntryWidget(QtWidgets.QWidget):
     def __init__(self, *args, **kwargs):
         super(EntryWidget, self).__init__(*args, **kwargs)
-        self.entry_ui = entryWidgetV2.Ui_Form()
+        self.entry_ui = entryWidget.Ui_Form()
         self.entry_ui.setupUi(self)
 
 
