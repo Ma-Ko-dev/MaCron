@@ -18,14 +18,18 @@ Limitations:
 - Unknown for now
 
 ## Previews
+The GUI is now fully dynamic. It will only show entries that are in the database and shows their name. I also finished the Add Dialog Design. Also: the buttons start to get functional ;)
+<br>
+![Preview of dynamic GUI](GUI-Sketch/Qt-Preview4.PNG)
+<br>
 Latest Version of the GUI with QT. So far i am happy with it. I also changed the name because i am a comedy genius.
 <br>
-![Another GUI Preview with QT](GUI-Sketch/QT-Preview-2.PNG)
+![Another GUI Preview with QT](GUI-Sketch/Qt-Preview2.PNG)
 ![Menubar Preview with Icons](GUI-Sketch/Qt-Preview3.png)
 <br>
 This is the first test GUI with QT.
 <br>
-![First QT GUI Preview](GUI-Sketch/QT-preview.PNG)
+![First QT GUI Preview](GUI-Sketch/Qt-preview1.PNG)
 <br>
 First Iteration of the Main GUI (Mockup made with [draw.io](http://www.draw.io))
 <br>
