@@ -18,6 +18,9 @@ Limitations:
 - Unknown for now
 
 ## Previews
+I added all the button functionality now. There was also some time to add the second color theme and the ooption to switch at any time.
+![Preview of Theme picker](GUI-Sketch/Qt-Preview5.PNG)
+<br>
 The GUI is now fully dynamic. It will only show entries that are in the database and shows their name. I also finished the Add Dialog Design. Also: the buttons start to get functional ;)
 <br>
 ![Preview of dynamic GUI](GUI-Sketch/Qt-Preview4.PNG)
