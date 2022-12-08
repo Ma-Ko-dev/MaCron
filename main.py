@@ -10,6 +10,8 @@ from sqlalchemy.orm import declarative_base, Session
 from PyQt5 import QtWidgets, QtCore, QtGui
 from UI import entryWidget, mainWindow, addDialog
 
+MINIMUM_INTERVAL = 60
+
 # db setup
 base = declarative_base()
 engine = create_engine("sqlite:///database.db")
@@ -56,15 +58,26 @@ class MainWindow(QtWidgets.QMainWindow):
         with Session(engine) as session:
             macronis = session.query(Macroni).all()
             for macroni in macronis:
+                days, hours, mins, secs = self.convert_interval(macroni.interval)
                 entry = EntryWidget()
                 entry.entry_ui.lbl_name.setText(macroni.name)
-                entry.entry_ui.lbl_interval.setText(str(macroni.interval))
+                entry.entry_ui.lbl_interval.setText(f"{days:02}:{hours:02}:{mins:02}:{secs:02}")
                 row += 1
                 self.ui.gridLayout.addWidget(entry, row, 0)
 
     def exit(self) -> None:
         """This method will simply close the program."""
         sys.exit()
+
+    def convert_interval(self, interval):
+        days = interval // (24 * 3600)
+        interval = interval % (24 * 3600)
+        hours = interval // 3600
+        interval %= 3600
+        mins = interval // 60
+        interval %= 60
+        secs = interval
+        return int(days), int(hours), int(mins), int(secs)
 
 
 class AddDialog(QtWidgets.QDialog):
@@ -93,16 +106,17 @@ class AddDialog(QtWidgets.QDialog):
         # TODO: Clean up and move some of this in extra functions
         path = self.add_dialog.edit_path.text()
         name = self.add_dialog.edit_name.text()
-        interval = 60
-        if path and name:
-            print("added, closing")
-            # print(f"{path} and {name}")
+        days = self.add_dialog.spn_days.value()
+        hours = self.add_dialog.spn_hours.value()
+        mins = self.add_dialog.spn_mins.value()
+        secs = self.add_dialog.spn_secs.value()
+        interval = datetime.timedelta(days=days, hours=hours, minutes=mins, seconds=secs).total_seconds()
+
+        if path and name and interval >= MINIMUM_INTERVAL:
             with Session(engine) as session:
                 macroni = Macroni()
                 macroni.name = name
                 macroni.path = path
-                # INFO: we need to calculate the interval here in seconds or when we get the data from the add gui,
-                # we already get it in seconds.
                 macroni.interval = interval
                 # calculate when the next run is according to current dateTime.now().timestamp() plus interval
                 new_run = datetime.datetime.now() + datetime.timedelta(seconds=interval)
@@ -121,10 +135,11 @@ class AddDialog(QtWidgets.QDialog):
             msg = QtWidgets.QMessageBox()
             msg.setWindowIcon(icon)
             msg.setIcon(QtWidgets.QMessageBox.Critical)
-            msg.setText("All fields are mandatory to fill! See details for more Information.")
+            msg.setText("All fields are mandatory to fill!\nSee details for more Information.")
             msg.setDetailedText("See below for more Information:\n"
                                 "The Path has to be filled with a valid Path.\n"
-                                "The Name field has to be at least 6 chars long.")
+                                "The Name field has to be at least 6 chars long.\n"
+                                "The minimum Interval is 60 seconds.")
             msg.setWindowTitle("ERROR")
             msg.setStandardButtons(QtWidgets.QMessageBox.Ok)
             msg.exec_()
@@ -193,12 +208,11 @@ def wait_timer():
 
 
 if __name__ == "__main__":
+    base.metadata.create_all(engine)
     app = QtWidgets.QApplication([])
     mainWin = MainWindow()
     app.setStyleSheet(qdarkstyle.load_stylesheet_pyqt5())
 
-    # base.metadata.create_all(engine)
-    # add_macroni(name="My second Script", interval=30)
     # run_macroni()
 
     mainWin.show()
