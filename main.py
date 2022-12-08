@@ -36,34 +36,43 @@ class MainWindow(QtWidgets.QMainWindow):
         super(MainWindow, self).__init__(*args, **kwargs)
         self.ui = mainWindow.Ui_MainWindow()
         self.ui.setupUi(self)
-
-        # entries
         self.entry_ids = []
 
         # adding entries to GUI
         self.add_entries_to_gui()
 
-        # sub window
-        self.sub_window = AddDialog()
-
         # Menu trigger
         self.ui.menu_action_exit.triggered.connect(self.exit)
         self.ui.menu_action_add.triggered.connect(self.open_dialog)
-        # Button clicked
+        # Button connections
         self.ui.btn_addScript.clicked.connect(self.open_dialog)
 
-    def open_dialog(self):
-        self.sub_window.exec_()
+    def open_dialog(self, id):
+        new_dialog = AddDialog()
+        if id:
+            with Session(engine) as session:
+                macroni = session.query(Macroni).get(id)
+            days, hours, mins, secs = self.convert_interval(macroni.interval)
+            new_dialog.add_dialog.edit_path.setText(macroni.path)
+            new_dialog.add_dialog.edit_name.setText(macroni.name)
+            new_dialog.add_dialog.spn_days.setValue(days)
+            new_dialog.add_dialog.spn_hours.setValue(hours)
+            new_dialog.add_dialog.spn_mins.setValue(mins)
+            new_dialog.add_dialog.spn_secs.setValue(secs)
+            new_dialog.edit_id = id
+            new_dialog.edit = True
+            new_dialog.edit_object = self.sender().parentWidget()
+        new_dialog.exec_()
 
     def delete_entry(self, id):
         with Session(engine) as session:
             session.query(Macroni).filter(Macroni.id == id).delete()
             session.commit()
+            self.entry_ids.remove(id)
         self.sender().parentWidget().deleteLater()
 
     def add_entries_to_gui(self) -> None:
         """When this method is called, it will read all entries in the database and add it to the GUI."""
-        # reset gui before adding?
         row = 0
         with Session(engine) as session:
             macronis = session.query(Macroni).all()
@@ -76,9 +85,16 @@ class MainWindow(QtWidgets.QMainWindow):
                     entry.entry_ui.lbl_interval.setText(f"{days:02}:{hours:02}:{mins:02}:{secs:02}")
                     entry.entry_ui.btn_delete.clicked.connect(lambda state, entry_id=entry.row_id:
                                                               self.delete_entry(entry_id))
+                    entry.entry_ui.btn_edit.clicked.connect(lambda state, entry_id=entry.row_id:
+                                                            self.open_dialog(entry_id))
+                    entry.entry_ui.btn_run.clicked.connect(lambda  state, path=macroni.path: self.run_script(path))
                     self.entry_ids.append(entry.row_id)
                     self.ui.gridLayout.addWidget(entry, row, 0)
                 row += 1
+
+    def run_script(self, path):
+        call(["python", path])
+        pass
 
     def exit(self) -> None:
         """This method will simply close the program."""
@@ -105,6 +121,11 @@ class AddDialog(QtWidgets.QDialog):
         # self.setWindowFlags(self.windowFlags() ^ QtCore.Qt.WindowStaysOnTopHint)
         self.setWindowFlags(self.windowFlags() ^ QtCore.Qt.WindowCloseButtonHint)
 
+        # edit flag
+        self.edit = False
+        self.edit_id = 0
+        self.edit_object = EntryWidget()
+
         # button events
         self.add_dialog.btn_cancel.clicked.connect(self.cancel_dialog)
         self.add_dialog.btn_select.clicked.connect(self.select_script)
@@ -118,7 +139,6 @@ class AddDialog(QtWidgets.QDialog):
         self.add_dialog.edit_path.setText(path_name[0])
 
     def add_to_db(self):
-        # TODO: Clean up and move some of this in extra functions
         path = self.add_dialog.edit_path.text()
         name = self.add_dialog.edit_name.text()
         days = self.add_dialog.spn_days.value()
@@ -129,20 +149,29 @@ class AddDialog(QtWidgets.QDialog):
 
         if path and name and interval >= MINIMUM_INTERVAL:
             with Session(engine) as session:
-                macroni = Macroni()
-                macroni.name = name
-                macroni.path = path
-                macroni.interval = interval
-                # calculate when the next run is according to current dateTime.now().timestamp() plus interval
-                new_run = datetime.datetime.now() + datetime.timedelta(seconds=interval)
-                macroni.next_run = new_run.timestamp()
+                if self.edit:
+                    macroni = session.query(Macroni).get(self.edit_id)
+                    macroni.name = name
+                    macroni.path = path
+                    macroni.interval = interval
+                    new_run = datetime.datetime.now() + datetime.timedelta(seconds=interval)
+                    macroni.next_run = new_run.timestamp()
+                    mainWin.entry_ids.remove(self.edit_id)
+                    self.edit_object.deleteLater()
+                    session.commit()
+                else:
+                    macroni = Macroni()
+                    macroni.name = name
+                    macroni.path = path
+                    macroni.interval = interval
+                    # calculate when the next run is according to current dateTime.now().timestamp() plus interval
+                    new_run = datetime.datetime.now() + datetime.timedelta(seconds=interval)
+                    macroni.next_run = new_run.timestamp()
 
-                session.add_all([macroni])
-                session.commit()
-            # TODO: See if i need a separate update method to maybe wipe all entries because i suspect at the moment
-            #  this will currently add some of the entries over old entries.
-            mainWin.add_entries_to_gui()
-            self.close()
+                    session.add_all([macroni])
+                    session.commit()
+                mainWin.add_entries_to_gui()
+                self.close()
         else:
             icon = QtGui.QIcon()
             icon.addPixmap(QtGui.QPixmap(":/icons/assets/icons/macaron_flaticon-com.ico"))
