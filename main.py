@@ -37,6 +37,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui = mainWindow.Ui_MainWindow()
         self.ui.setupUi(self)
 
+        # entries
+        self.entry_ids = []
+
         # adding entries to GUI
         self.add_entries_to_gui()
 
@@ -52,18 +55,30 @@ class MainWindow(QtWidgets.QMainWindow):
     def open_dialog(self):
         self.sub_window.exec_()
 
+    def delete_entry(self, id):
+        with Session(engine) as session:
+            session.query(Macroni).filter(Macroni.id == id).delete()
+            session.commit()
+        self.sender().parentWidget().deleteLater()
+
     def add_entries_to_gui(self) -> None:
         """When this method is called, it will read all entries in the database and add it to the GUI."""
+        # reset gui before adding?
         row = 0
         with Session(engine) as session:
             macronis = session.query(Macroni).all()
             for macroni in macronis:
-                days, hours, mins, secs = self.convert_interval(macroni.interval)
-                entry = EntryWidget()
-                entry.entry_ui.lbl_name.setText(macroni.name)
-                entry.entry_ui.lbl_interval.setText(f"{days:02}:{hours:02}:{mins:02}:{secs:02}")
+                if macroni.id not in self.entry_ids:
+                    days, hours, mins, secs = self.convert_interval(macroni.interval)
+                    entry = EntryWidget()
+                    entry.row_id = macroni.id
+                    entry.entry_ui.lbl_name.setText(macroni.name)
+                    entry.entry_ui.lbl_interval.setText(f"{days:02}:{hours:02}:{mins:02}:{secs:02}")
+                    entry.entry_ui.btn_delete.clicked.connect(lambda state, entry_id=entry.row_id:
+                                                              self.delete_entry(entry_id))
+                    self.entry_ids.append(entry.row_id)
+                    self.ui.gridLayout.addWidget(entry, row, 0)
                 row += 1
-                self.ui.gridLayout.addWidget(entry, row, 0)
 
     def exit(self) -> None:
         """This method will simply close the program."""
