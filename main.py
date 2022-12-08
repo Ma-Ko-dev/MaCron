@@ -44,8 +44,16 @@ class MainWindow(QtWidgets.QMainWindow):
         # Menu trigger
         self.ui.menu_action_exit.triggered.connect(self.exit)
         self.ui.menu_action_add.triggered.connect(self.open_dialog)
+        self.ui.menu_theme_dark.triggered.connect(self.theme_dark)
+        self.ui.menu_theme_light.triggered.connect(self.theme_light)
         # Button connections
         self.ui.btn_addScript.clicked.connect(self.open_dialog)
+
+    def theme_dark(self):
+        app.setStyleSheet(qdarkstyle.load_stylesheet(palette=qdarkstyle.DarkPalette))
+
+    def theme_light(self):
+        app.setStyleSheet(qdarkstyle.load_stylesheet(palette=qdarkstyle.LightPalette))
 
     def open_dialog(self, id):
         new_dialog = AddDialog()
@@ -255,7 +263,7 @@ if __name__ == "__main__":
     base.metadata.create_all(engine)
     app = QtWidgets.QApplication([])
     mainWin = MainWindow()
-    app.setStyleSheet(qdarkstyle.load_stylesheet_pyqt5())
+    app.setStyleSheet(qdarkstyle.load_stylesheet(qdarkstyle.DarkPalette))
 
     # run_macroni()
 
