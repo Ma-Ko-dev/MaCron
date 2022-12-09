@@ -38,7 +38,21 @@ class MainWindow(QtWidgets.QMainWindow):
         self.entry_ids = []
         self.title = self.windowTitle()
 
-        #setting up the timer
+        # setting up the tray
+        self.tray_icon = QtGui.QIcon(QtGui.QPixmap(":/icons/assets/icons/macaron_flaticon-com.ico"))
+        self.tray = QtWidgets.QSystemTrayIcon()
+        self.tray.setIcon(self.tray_icon)
+
+        self.tray_menu = QtWidgets.QMenu()
+        self.tray_show = QtWidgets.QAction("Show", self)
+        self.tray_show.triggered.connect(self.show)
+
+        self.tray_menu.addAction(self.tray_show)
+
+        self.tray.setContextMenu(self.tray_menu)
+        self.tray.show()
+
+        # setting up the timer
         self.update_title()
         self.timer = QtCore.QTimer()
         self.timer.timeout.connect(self.update_title)
@@ -55,6 +69,10 @@ class MainWindow(QtWidgets.QMainWindow):
         # Button connections
         self.ui.btn_addScript.clicked.connect(self.open_dialog)
 
+    def closeEvent(self, event):
+        event.ignore()
+        self.hide()
+
     def update_title(self):
         self.setWindowTitle(f"{self.title} - {datetime.datetime.now().strftime('%H:%M:%S')}")
         self.run_macroni()
@@ -67,7 +85,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def open_dialog(self, xid):
         new_dialog = AddDialog()
-        if id:
+        if xid:
             with Session(engine) as session:
                 macroni = session.query(Macroni).get(xid)
             days, hours, mins, secs = self.convert_interval(macroni.interval)
@@ -134,7 +152,7 @@ class MainWindow(QtWidgets.QMainWindow):
                     Macroni.next_run: new_run.timestamp()
                 }
             )
-            logging.info(f"ID: {macroni_id} got new runtime: {new_run}")
+            logging.info(f"ID: {macroni_id} got new runtime: {new_run.strftime('%d.%m.%Y %H:%M:%S')}")
             session.commit()
 
     def exit(self) -> None:
@@ -236,60 +254,6 @@ class EntryWidget(QtWidgets.QWidget):
         super(EntryWidget, self).__init__(*args, **kwargs)
         self.entry_ui = entryWidget.Ui_Form()
         self.entry_ui.setupUi(self)
-
-
-# def add_macroni(name: str, interval: int) -> None:
-#     with Session(engine) as session:
-#         macroni = Macroni()
-#         macroni.name = name
-#         # macroni.path = path_picker()
-#         # INFO: we need to calculate the interval here in seconds or when we get the data from the add gui, we already
-#         #  get it in seconds.
-#         macroni.interval = interval
-#         # calculate when the next run is according to current dateTime.now().timestamp() plus interval
-#         new_run = datetime.datetime.now() + datetime.timedelta(seconds=interval)
-#         macroni.next_run = new_run.timestamp()
-#
-#         session.add_all([macroni])
-#         session.commit()
-
-
-# def run_macroni():
-#     with Session(engine) as session:
-#         macronis = session.query(Macroni).all()
-#         for macroni in macronis:
-#             if datetime.datetime.now().timestamp() > macroni.next_run:
-#                 # print(f"[DEBUG][{macroni.name}][{macroni.id}][{datetime.datetime.now().time()}]: i run now")
-#                 logging.debug(f"Scriptname: {macroni.name} - ID: {macroni.id}")
-#                 call(["python", macroni.path])
-#                 reset_next_run(macroni.id, macroni.interval)
-#         wait_timer()
-#
-#
-# def reset_next_run(macroni_id, interval):
-#     new_run = datetime.datetime.now() + datetime.timedelta(seconds=interval)
-#     with Session(engine) as session:
-#
-#         session.query(Macroni).filter(Macroni.id == macroni_id).update(
-#             {
-#                 Macroni.next_run: new_run.timestamp()
-#             }
-#         )
-#         session.commit()
-
-
-# def wait_timer():
-#     time.sleep(1)
-#     run_macroni()
-
-
-# def path_picker():
-#     from tkinter import Tk
-#     from tkinter.filedialog import askopenfilename
-#
-#     Tk().withdraw()
-#     filename = askopenfilename()
-#     return filename
 
 
 if __name__ == "__main__":
