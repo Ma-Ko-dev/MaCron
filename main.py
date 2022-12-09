@@ -10,7 +10,7 @@ from sqlalchemy.orm import declarative_base, Session
 from PyQt5 import QtWidgets, QtCore, QtGui
 from UI import entryWidget, mainWindow, addDialog
 
-MINIMUM_INTERVAL = 60
+MINIMUM_INTERVAL = 10
 
 # db setup
 base = declarative_base()
@@ -37,6 +37,13 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui = mainWindow.Ui_MainWindow()
         self.ui.setupUi(self)
         self.entry_ids = []
+        self.title = self.windowTitle()
+
+        #setting up the timer
+        self.update_title()
+        self.timer = QtCore.QTimer()
+        self.timer.timeout.connect(self.update_title)
+        self.timer.start(1000)
 
         # adding entries to GUI
         self.add_entries_to_gui()
@@ -49,17 +56,21 @@ class MainWindow(QtWidgets.QMainWindow):
         # Button connections
         self.ui.btn_addScript.clicked.connect(self.open_dialog)
 
+    def update_title(self):
+        self.setWindowTitle(f"{self.title} - {datetime.datetime.now().strftime('%H:%M:%S')}")
+        self.run_macroni()
+
     def theme_dark(self):
         app.setStyleSheet(qdarkstyle.load_stylesheet(palette=qdarkstyle.DarkPalette))
 
     def theme_light(self):
         app.setStyleSheet(qdarkstyle.load_stylesheet(palette=qdarkstyle.LightPalette))
 
-    def open_dialog(self, id):
+    def open_dialog(self, xid):
         new_dialog = AddDialog()
         if id:
             with Session(engine) as session:
-                macroni = session.query(Macroni).get(id)
+                macroni = session.query(Macroni).get(xid)
             days, hours, mins, secs = self.convert_interval(macroni.interval)
             new_dialog.add_dialog.edit_path.setText(macroni.path)
             new_dialog.add_dialog.edit_name.setText(macroni.name)
@@ -67,16 +78,16 @@ class MainWindow(QtWidgets.QMainWindow):
             new_dialog.add_dialog.spn_hours.setValue(hours)
             new_dialog.add_dialog.spn_mins.setValue(mins)
             new_dialog.add_dialog.spn_secs.setValue(secs)
-            new_dialog.edit_id = id
+            new_dialog.edit_id = xid
             new_dialog.edit = True
             new_dialog.edit_object = self.sender().parentWidget()
         new_dialog.exec_()
 
-    def delete_entry(self, id):
+    def delete_entry(self, xid):
         with Session(engine) as session:
-            session.query(Macroni).filter(Macroni.id == id).delete()
+            session.query(Macroni).filter(Macroni.id == xid).delete()
             session.commit()
-            self.entry_ids.remove(id)
+            self.entry_ids.remove(xid)
         self.sender().parentWidget().deleteLater()
 
     def add_entries_to_gui(self) -> None:
@@ -95,14 +106,37 @@ class MainWindow(QtWidgets.QMainWindow):
                                                               self.delete_entry(entry_id))
                     entry.entry_ui.btn_edit.clicked.connect(lambda state, entry_id=entry.row_id:
                                                             self.open_dialog(entry_id))
-                    entry.entry_ui.btn_run.clicked.connect(lambda  state, path=macroni.path: self.run_script(path))
+                    entry.entry_ui.btn_run.clicked.connect(lambda state, path=macroni.path:
+                                                           self.run_macroni_manual(path, macroni.id, macroni.interval))
                     self.entry_ids.append(entry.row_id)
                     self.ui.gridLayout.addWidget(entry, row, 0)
                 row += 1
 
-    def run_script(self, path):
+    def run_macroni_manual(self, path, xid, interval):
         call(["python", path])
-        pass
+        logging.debug(f"Manual run of ID: {xid}")
+        self.reset_next_run(xid, interval)
+
+    def run_macroni(self):
+        with Session(engine) as session:
+            macronis = session.query(Macroni).all()
+            for macroni in macronis:
+                if datetime.datetime.now().timestamp() >= macroni.next_run:
+                    logging.debug(f"Scriptname: {macroni.name} - ID: {macroni.id}")
+                    call(["python", macroni.path])
+                    self.reset_next_run(macroni.id, macroni.interval)
+
+    def reset_next_run(self, macroni_id, interval):
+        new_run = datetime.datetime.now() + datetime.timedelta(seconds=interval)
+        with Session(engine) as session:
+            # TODO: Change the update here
+            session.query(Macroni).filter(Macroni.id == macroni_id).update(
+                {
+                    Macroni.next_run: new_run.timestamp()
+                }
+            )
+            logging.info(f"ID: {macroni_id} got new runtime: {new_run}")
+            session.commit()
 
     def exit(self) -> None:
         """This method will simply close the program."""
@@ -205,49 +239,49 @@ class EntryWidget(QtWidgets.QWidget):
         self.entry_ui.setupUi(self)
 
 
-def add_macroni(name: str, interval: int) -> None:
-    with Session(engine) as session:
-        macroni = Macroni()
-        macroni.name = name
-        # macroni.path = path_picker()
-        # INFO: we need to calculate the interval here in seconds or when we get the data from the add gui, we already
-        #  get it in seconds.
-        macroni.interval = interval
-        # calculate when the next run is according to current dateTime.now().timestamp() plus interval
-        new_run = datetime.datetime.now() + datetime.timedelta(seconds=interval)
-        macroni.next_run = new_run.timestamp()
-
-        session.add_all([macroni])
-        session.commit()
-
-
-def run_macroni():
-    with Session(engine) as session:
-        macronis = session.query(Macroni).all()
-        for macroni in macronis:
-            if datetime.datetime.now().timestamp() > macroni.next_run:
-                # print(f"[DEBUG][{macroni.name}][{macroni.id}][{datetime.datetime.now().time()}]: i run now")
-                logging.debug(f"Scriptname: {macroni.name} - ID: {macroni.id}")
-                call(["python", macroni.path])
-                reset_next_run(macroni.id, macroni.interval)
-        wait_timer()
+# def add_macroni(name: str, interval: int) -> None:
+#     with Session(engine) as session:
+#         macroni = Macroni()
+#         macroni.name = name
+#         # macroni.path = path_picker()
+#         # INFO: we need to calculate the interval here in seconds or when we get the data from the add gui, we already
+#         #  get it in seconds.
+#         macroni.interval = interval
+#         # calculate when the next run is according to current dateTime.now().timestamp() plus interval
+#         new_run = datetime.datetime.now() + datetime.timedelta(seconds=interval)
+#         macroni.next_run = new_run.timestamp()
+#
+#         session.add_all([macroni])
+#         session.commit()
 
 
-def reset_next_run(macroni_id, interval):
-    new_run = datetime.datetime.now() + datetime.timedelta(seconds=interval)
-    with Session(engine) as session:
+# def run_macroni():
+#     with Session(engine) as session:
+#         macronis = session.query(Macroni).all()
+#         for macroni in macronis:
+#             if datetime.datetime.now().timestamp() > macroni.next_run:
+#                 # print(f"[DEBUG][{macroni.name}][{macroni.id}][{datetime.datetime.now().time()}]: i run now")
+#                 logging.debug(f"Scriptname: {macroni.name} - ID: {macroni.id}")
+#                 call(["python", macroni.path])
+#                 reset_next_run(macroni.id, macroni.interval)
+#         wait_timer()
+#
+#
+# def reset_next_run(macroni_id, interval):
+#     new_run = datetime.datetime.now() + datetime.timedelta(seconds=interval)
+#     with Session(engine) as session:
+#
+#         session.query(Macroni).filter(Macroni.id == macroni_id).update(
+#             {
+#                 Macroni.next_run: new_run.timestamp()
+#             }
+#         )
+#         session.commit()
 
-        session.query(Macroni).filter(Macroni.id == macroni_id).update(
-            {
-                Macroni.next_run: new_run.timestamp()
-            }
-        )
-        session.commit()
 
-
-def wait_timer():
-    time.sleep(1)
-    run_macroni()
+# def wait_timer():
+#     time.sleep(1)
+#     run_macroni()
 
 
 # def path_picker():
@@ -263,9 +297,8 @@ if __name__ == "__main__":
     base.metadata.create_all(engine)
     app = QtWidgets.QApplication([])
     mainWin = MainWindow()
-    app.setStyleSheet(qdarkstyle.load_stylesheet(qdarkstyle.DarkPalette))
-
-    # run_macroni()
+    # TODO: save and load last used theme here
+    app.setStyleSheet(qdarkstyle.load_stylesheet(palette=qdarkstyle.DarkPalette))
 
     mainWin.show()
     app.exec()
