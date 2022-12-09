@@ -1,6 +1,5 @@
 import datetime
 import sys
-import time
 import qdarkstyle
 import logging
 from subprocess import call
