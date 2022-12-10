@@ -1,4 +1,5 @@
 import datetime
+import os.path
 import sys
 import qdarkstyle
 import logging
@@ -12,12 +13,15 @@ from UI import entryWidget, mainWindow, addDialog
 # for now the minimum interval is 60 seconds
 MINIMUM_INTERVAL = 60
 
+# check for log folder
+if not os.path.exists("logs"):
+    os.makedirs("logs")
+
 # db setup
 base = declarative_base()
 engine = create_engine("sqlite:///database.db")
 # logging setup
-# TODO: Add back logging to file
-logging.basicConfig(level=logging.DEBUG,
+logging.basicConfig(filename="logs/log.log", filemode="w", level=logging.DEBUG,
                     format="%(asctime)s|%(levelname)s|%(funcName)s|%(message)s",
                     datefmt="%d.%m.%Y-%H:%M:%S")
 
@@ -171,7 +175,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def run_macroni_manual(self, path, xid, interval) -> None:
         """When called, it will run the script at <path> and calls reset_next_run() with <xid>, <interval>"""
         call(["python", path])
-        logging.debug(f"Manual run of ID: {xid}")
+        logging.info(f"Manual run -> ID: {xid} - Interval: {interval}")
         self.reset_next_run(xid, interval)
 
     def run_macroni(self) -> None:
@@ -181,7 +185,7 @@ class MainWindow(QtWidgets.QMainWindow):
             macronis = session.query(Macroni).all()
             for macroni in macronis:
                 if datetime.datetime.now().timestamp() >= macroni.next_run:
-                    logging.debug(f"Scriptname: {macroni.name} - ID: {macroni.id}")
+                    logging.info(f"Autorun-> ID: {macroni.id} - Interval: {macroni.interval}")
                     call(["python", macroni.path])
                     self.reset_next_run(macroni.id, macroni.interval)
 
@@ -191,7 +195,7 @@ class MainWindow(QtWidgets.QMainWindow):
         with Session(engine) as session:
             macroni = session.query(Macroni).get(macroni_id)
             macroni.next_run = new_run.timestamp()
-            logging.info(f"ID: {macroni_id} got new runtime: {new_run.strftime('%d.%m.%Y %H:%M:%S')}")
+            logging.info(f"Next run -> ID: {macroni_id} - Time: {new_run.strftime('%d.%m.%Y %H:%M:%S')}")
             session.commit()
 
     def convert_interval(self, interval):
