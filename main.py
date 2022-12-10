@@ -28,8 +28,8 @@ logging.basicConfig(filename="logs/log.log", filemode="w", level=logging.DEBUG,
 
 class Macroni(base):
     """Database Structure.
-    ID gets autofilled, name is the name of the Script, path is the absolut path to the Script, interval is the time in
-    seconds a script should run, next_run is a timestamp. """
+    ID gets filled automatically, name is the name of the Script, path is the absolut path to the Script, interval is
+    the time in seconds a script should run, next_run is a timestamp. """
 
     __tablename__ = "macronis"
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -101,6 +101,7 @@ class MainWindow(QtWidgets.QMainWindow):
         if reason == 2 or reason == 3:
             self.show()
 
+    # noinspection PyMethodMayBeStatic
     def exit(self) -> None:
         """This method will simply close the program."""
         sys.exit()
@@ -113,11 +114,11 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def theme_dark(self) -> None:
         """Changes the current color theme to dark."""
-        app.setStyleSheet(qdarkstyle.load_stylesheet(palette=qdarkstyle.DarkPalette))
+        self.setStyleSheet(qdarkstyle.load_stylesheet(palette=qdarkstyle.DarkPalette))
 
     def theme_light(self) -> None:
         """Changes the current color theme to light."""
-        app.setStyleSheet(qdarkstyle.load_stylesheet(palette=qdarkstyle.LightPalette))
+        self.setStyleSheet(qdarkstyle.load_stylesheet(palette=qdarkstyle.LightPalette))
 
     def open_dialog(self, xid: int) -> None:
         """Opens the dialog to add or edit a new Script. If xid is given, it will look up the id in the
@@ -189,6 +190,7 @@ class MainWindow(QtWidgets.QMainWindow):
                     call(["python", macroni.path])
                     self.reset_next_run(macroni.id, macroni.interval)
 
+    # noinspection PyMethodMayBeStatic
     def reset_next_run(self, macroni_id, interval) -> None:
         """Resets the next_run variable in the database with a new run time."""
         new_run = datetime.datetime.now() + datetime.timedelta(seconds=interval)
@@ -198,6 +200,7 @@ class MainWindow(QtWidgets.QMainWindow):
             logging.info(f"Next run -> ID: {macroni_id} - Time: {new_run.strftime('%d.%m.%Y %H:%M:%S')}")
             session.commit()
 
+    # noinspection PyMethodMayBeStatic
     def convert_interval(self, interval):
         """Converts the given interval to days, hours, mins and secs. Mostly for format reasons."""
         days = interval // (24 * 3600)
