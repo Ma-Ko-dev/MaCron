@@ -9,20 +9,25 @@ from sqlalchemy.orm import declarative_base, Session
 from PyQt5 import QtWidgets, QtCore, QtGui
 from UI import entryWidget, mainWindow, addDialog
 
-MINIMUM_INTERVAL = 10
+# for now the minimum interval is 60 seconds
+MINIMUM_INTERVAL = 60
 
 # db setup
 base = declarative_base()
 engine = create_engine("sqlite:///database.db")
 # logging setup
+# TODO: Add back logging to file
 logging.basicConfig(level=logging.DEBUG,
                     format="%(asctime)s|%(levelname)s|%(funcName)s|%(message)s",
                     datefmt="%d.%m.%Y-%H:%M:%S")
 
 
 class Macroni(base):
-    __tablename__ = "macronis"
+    """Database Structure.
+    ID gets autofilled, name is the name of the Script, path is the absolut path to the Script, interval is the time in
+    seconds a script should run, next_run is a timestamp. """
 
+    __tablename__ = "macronis"
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(40), nullable=False)
     path = Column(String(100), nullable=False)
@@ -31,6 +36,8 @@ class Macroni(base):
 
 
 class MainWindow(QtWidgets.QMainWindow):
+    """Handles all MainWindow related tasks. It will create a window from UI.mainWindow which was created
+    with the Qt Designer."""
     def __init__(self, *args, **kwargs):
         super(MainWindow, self).__init__(*args, **kwargs)
         self.ui = mainWindow.Ui_MainWindow()
@@ -39,17 +46,27 @@ class MainWindow(QtWidgets.QMainWindow):
         self.title = self.windowTitle()
 
         # setting up the tray
-        self.tray_icon = QtGui.QIcon(QtGui.QPixmap(":/icons/assets/icons/macaron_flaticon-com.ico"))
         self.tray = QtWidgets.QSystemTrayIcon()
+        self.tray_icon = QtGui.QIcon(QtGui.QPixmap(":/icons/assets/icons/macaron_flaticon-com.ico"))
         self.tray.setIcon(self.tray_icon)
 
         self.tray_menu = QtWidgets.QMenu()
+        self.tray_font = self.tray_menu.font()
+        self.tray_font.setPointSize(12)
+        self.tray_menu.setFont(self.tray_font)
+
+        self.tray_exit = QtWidgets.QAction("Quit", self)
         self.tray_show = QtWidgets.QAction("Show", self)
+
         self.tray_show.triggered.connect(self.show)
+        self.tray_exit.triggered.connect(self.exit)
 
         self.tray_menu.addAction(self.tray_show)
+        self.tray_menu.addAction(self.tray_exit)
 
         self.tray.setContextMenu(self.tray_menu)
+
+        self.tray.activated.connect(self.tray_activated)
         self.tray.show()
 
         # setting up the timer
@@ -69,21 +86,38 @@ class MainWindow(QtWidgets.QMainWindow):
         # Button connections
         self.ui.btn_addScript.clicked.connect(self.open_dialog)
 
-    def closeEvent(self, event):
-        event.ignore()
-        self.hide()
+    def changeEvent(self, event) -> None:
+        """Checks if the event comes from minimizing and hides the window."""
+        if event.type() == QtCore.QEvent.WindowStateChange:
+            if event.oldState() == QtCore.Qt.WindowNoState or self.windowState() == QtCore.Qt.WindowMaximized:
+                self.hide()
 
-    def update_title(self):
+    def tray_activated(self, reason) -> None:
+        """Check if the tray icon got clicked once or doubleClicked and then brings the window back."""
+        if reason == 2 or reason == 3:
+            self.show()
+
+    def exit(self) -> None:
+        """This method will simply close the program."""
+        sys.exit()
+
+    def update_title(self) -> None:
+        """Will get called every second by a timer, updates the title with the current time and then calls
+        the method run_macroni() to see if any script should be executed."""
         self.setWindowTitle(f"{self.title} - {datetime.datetime.now().strftime('%H:%M:%S')}")
         self.run_macroni()
 
-    def theme_dark(self):
+    def theme_dark(self) -> None:
+        """Changes the current color theme to dark."""
         app.setStyleSheet(qdarkstyle.load_stylesheet(palette=qdarkstyle.DarkPalette))
 
-    def theme_light(self):
+    def theme_light(self) -> None:
+        """Changes the current color theme to light."""
         app.setStyleSheet(qdarkstyle.load_stylesheet(palette=qdarkstyle.LightPalette))
 
-    def open_dialog(self, xid):
+    def open_dialog(self, xid: int) -> None:
+        """Opens the dialog to add or edit a new Script. If xid is given, it will look up the id in the
+        Database and pre-fill the Dialog options with the id's contents. Otherwise, it will simply open the dialog."""
         new_dialog = AddDialog()
         if xid:
             with Session(engine) as session:
@@ -100,7 +134,9 @@ class MainWindow(QtWidgets.QMainWindow):
             new_dialog.edit_object = self.sender().parentWidget()
         new_dialog.exec_()
 
-    def delete_entry(self, xid):
+    def delete_entry(self, xid: int) -> None:
+        """Will delete the given entry by id from the database, the corresponding GUI entryWidget and id in the
+        entry_ids list."""
         with Session(engine) as session:
             session.query(Macroni).filter(Macroni.id == xid).delete()
             session.commit()
@@ -108,7 +144,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.sender().parentWidget().deleteLater()
 
     def add_entries_to_gui(self) -> None:
-        """When this method is called, it will read all entries in the database and add it to the GUI."""
+        """When called, it will read all entries in the database and add it to the GUI. To ensure that there are no
+        entries overlapping, it will add the id of each entry to a list and checks if the id already is in the list."""
         row = 0
         with Session(engine) as session:
             macronis = session.query(Macroni).all()
@@ -118,6 +155,8 @@ class MainWindow(QtWidgets.QMainWindow):
                     entry = EntryWidget()
                     entry.row_id = macroni.id
                     entry.entry_ui.lbl_name.setText(macroni.name)
+                    # each label and button in the entryWidget will get its own values, corresponding to the database
+                    # entry
                     entry.entry_ui.lbl_interval.setText(f"{days:02}:{hours:02}:{mins:02}:{secs:02}")
                     entry.entry_ui.btn_delete.clicked.connect(lambda state, entry_id=entry.row_id:
                                                               self.delete_entry(entry_id))
@@ -129,12 +168,15 @@ class MainWindow(QtWidgets.QMainWindow):
                     self.ui.gridLayout.addWidget(entry, row, 0)
                 row += 1
 
-    def run_macroni_manual(self, path, xid, interval):
+    def run_macroni_manual(self, path, xid, interval) -> None:
+        """When called, it will run the script at <path> and calls reset_next_run() with <xid>, <interval>"""
         call(["python", path])
         logging.debug(f"Manual run of ID: {xid}")
         self.reset_next_run(xid, interval)
 
-    def run_macroni(self):
+    def run_macroni(self) -> None:
+        """Queries the database to get all entries and checks if the current time is bigger or equal to the next_run
+        variable. If this is true, the Script will be executed and reset_next_run() is called for this entry."""
         with Session(engine) as session:
             macronis = session.query(Macroni).all()
             for macroni in macronis:
@@ -143,23 +185,17 @@ class MainWindow(QtWidgets.QMainWindow):
                     call(["python", macroni.path])
                     self.reset_next_run(macroni.id, macroni.interval)
 
-    def reset_next_run(self, macroni_id, interval):
+    def reset_next_run(self, macroni_id, interval) -> None:
+        """Resets the next_run variable in the database with a new run time."""
         new_run = datetime.datetime.now() + datetime.timedelta(seconds=interval)
         with Session(engine) as session:
-            # TODO: Change the update here
-            session.query(Macroni).filter(Macroni.id == macroni_id).update(
-                {
-                    Macroni.next_run: new_run.timestamp()
-                }
-            )
+            macroni = session.query(Macroni).get(macroni_id)
+            macroni.next_run = new_run.timestamp()
             logging.info(f"ID: {macroni_id} got new runtime: {new_run.strftime('%d.%m.%Y %H:%M:%S')}")
             session.commit()
 
-    def exit(self) -> None:
-        """This method will simply close the program."""
-        sys.exit()
-
     def convert_interval(self, interval):
+        """Converts the given interval to days, hours, mins and secs. Mostly for format reasons."""
         days = interval // (24 * 3600)
         interval = interval % (24 * 3600)
         hours = interval // 3600
@@ -171,16 +207,16 @@ class MainWindow(QtWidgets.QMainWindow):
 
 
 class AddDialog(QtWidgets.QDialog):
+    """Works as the dialog that pops up when the edit or add button is clicked."""
     def __init__(self, *args, **kwargs):
         super(AddDialog, self).__init__(*args, **kwargs)
         self.add_dialog = addDialog.Ui_Dialog()
         self.add_dialog.setupUi(self)
-        # remove the question mark and keep the dialog on top
+        # remove the question mark
         self.setWindowFlags(self.windowFlags() ^ QtCore.Qt.WindowContextHelpButtonHint)
-        # self.setWindowFlags(self.windowFlags() ^ QtCore.Qt.WindowStaysOnTopHint)
-        self.setWindowFlags(self.windowFlags() ^ QtCore.Qt.WindowCloseButtonHint)
+        # self.setWindowFlags(self.windowFlags() ^ QtCore.Qt.WindowCloseButtonHint)
 
-        # edit flag
+        # we need this to make sure to know when to add and when to edit an entry
         self.edit = False
         self.edit_id = 0
         self.edit_object = EntryWidget()
@@ -190,14 +226,20 @@ class AddDialog(QtWidgets.QDialog):
         self.add_dialog.btn_select.clicked.connect(self.select_script)
         self.add_dialog.btn_add.clicked.connect(self.add_to_db)
 
-    def cancel_dialog(self):
+    def cancel_dialog(self) -> None:
+        """Simply closes the dialog."""
         self.close()
 
-    def select_script(self):
+    def select_script(self) -> None:
+        """Opens a filedialog to pick a python script and set its path to the correct label."""
         path_name = QtWidgets.QFileDialog.getOpenFileName(self, "Select Script", "c:\\", "Python files (*.py)")
         self.add_dialog.edit_path.setText(path_name[0])
 
     def add_to_db(self):
+        """Adds a new entry to the database. It will take data from all given fields and first checks if nothing is
+        empty, if any is empty it will display an info popup with some information. When all fields have data, it will
+        then check if <edit> is true to determine if it has to update an entry or create a new one. In the end it will
+        call add_entries_to_gui from the mainWindow and close itself."""
         path = self.add_dialog.edit_path.text()
         name = self.add_dialog.edit_name.text()
         days = self.add_dialog.spn_days.value()
@@ -206,7 +248,7 @@ class AddDialog(QtWidgets.QDialog):
         secs = self.add_dialog.spn_secs.value()
         interval = datetime.timedelta(days=days, hours=hours, minutes=mins, seconds=secs).total_seconds()
 
-        if path and name and interval >= MINIMUM_INTERVAL:
+        if path and len(name) >= 6 and interval >= MINIMUM_INTERVAL:
             with Session(engine) as session:
                 if self.edit:
                     macroni = session.query(Macroni).get(self.edit_id)
@@ -223,10 +265,8 @@ class AddDialog(QtWidgets.QDialog):
                     macroni.name = name
                     macroni.path = path
                     macroni.interval = interval
-                    # calculate when the next run is according to current dateTime.now().timestamp() plus interval
                     new_run = datetime.datetime.now() + datetime.timedelta(seconds=interval)
                     macroni.next_run = new_run.timestamp()
-
                     session.add_all([macroni])
                     session.commit()
                 mainWin.add_entries_to_gui()
@@ -240,7 +280,7 @@ class AddDialog(QtWidgets.QDialog):
             msg.setIcon(QtWidgets.QMessageBox.Critical)
             msg.setText("All fields are mandatory to fill!\nSee details for more Information.")
             msg.setDetailedText("See below for more Information:\n"
-                                "The Path has to be filled with a valid Path.\n"
+                                "The Path has to be filled with a valid Path to a Python file.\n"
                                 "The Name field has to be at least 6 chars long.\n"
                                 "The minimum Interval is 60 seconds.")
             msg.setWindowTitle("ERROR")
@@ -249,7 +289,7 @@ class AddDialog(QtWidgets.QDialog):
 
 
 class EntryWidget(QtWidgets.QWidget):
-    """This Class acts as the entry for the main GUI"""
+    """Acts as the entry for the main GUI"""
     def __init__(self, *args, **kwargs):
         super(EntryWidget, self).__init__(*args, **kwargs)
         self.entry_ui = entryWidget.Ui_Form()
