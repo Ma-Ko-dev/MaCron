@@ -1,5 +1,6 @@
 import datetime
 import os.path
+import subprocess
 import sys
 import qdarkstyle
 import logging
@@ -50,6 +51,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.title = self.windowTitle()
 
         # setting up the tray
+        # TODO: Add some form of tooltip when hovering your mouse over the tray icon.
         self.tray = QtWidgets.QSystemTrayIcon()
         self.tray_icon = QtGui.QIcon(QtGui.QPixmap(":/icons/assets/icons/macaron_flaticon-com.ico"))
         self.tray.setIcon(self.tray_icon)
@@ -69,7 +71,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.tray_menu.addAction(self.tray_exit)
 
         self.tray.setContextMenu(self.tray_menu)
-
+        # TODO: Bring the window to the foreground when clicked
         self.tray.activated.connect(self.tray_activated)
         self.tray.show()
 
@@ -174,10 +176,13 @@ class MainWindow(QtWidgets.QMainWindow):
                 row += 1
 
     def run_macroni_manual(self, path, xid, interval) -> None:
-        # TODO: Add something to the log if a script produced an error
         """When called, it will run the script at <path> and calls reset_next_run() with <xid>, <interval>"""
-        run(["pythonw", path])
-        logging.info(f"Manual run -> ID: {xid} - Interval: {interval}")
+        try:
+            run(["pythonw", path], check=True, capture_output=True)
+        except subprocess.CalledProcessError as e:
+            logging.error(f"Manual run-> ID: {xid} | {path}\nReturncode: {e.returncode}, Output: {e.output}\n"
+                          f"{e.stderr.decode('utf-8')}")
+        logging.info(f"Manual run-> ID: {xid} - Interval: {interval}")
         self.reset_next_run(xid, interval)
 
     def run_macroni(self) -> None:
@@ -187,8 +192,12 @@ class MainWindow(QtWidgets.QMainWindow):
             macronis = session.query(Macroni).all()
             for macroni in macronis:
                 if datetime.datetime.now().timestamp() >= macroni.next_run:
+                    try:
+                        run(["pythonw", macroni.path], check=True, capture_output=True)
+                    except subprocess.CalledProcessError as e:
+                        logging.error(f"Autorun-> ID: {macroni.id} | {macroni.path}\n {e.returncode}, Output: "
+                                      f"{e.output}\n{e.stderr.decode('utf-8')}")
                     logging.info(f"Autorun-> ID: {macroni.id} - Interval: {macroni.interval}")
-                    run(["pythonw", macroni.path])
                     self.reset_next_run(macroni.id, macroni.interval)
 
     # noinspection PyMethodMayBeStatic
@@ -198,7 +207,7 @@ class MainWindow(QtWidgets.QMainWindow):
         with Session(engine) as session:
             macroni = session.query(Macroni).get(macroni_id)
             macroni.next_run = new_run.timestamp()
-            logging.info(f"Next run -> ID: {macroni_id} - Time: {new_run.strftime('%d.%m.%Y %H:%M:%S')}")
+            logging.info(f"ID: {macroni_id} - Next time: {new_run.strftime('%d.%m.%Y %H:%M:%S')}")
             session.commit()
 
     # noinspection PyMethodMayBeStatic
