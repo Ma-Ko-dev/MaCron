@@ -3,7 +3,7 @@ import os.path
 import sys
 import qdarkstyle
 import logging
-from subprocess import call
+from subprocess import run
 
 from sqlalchemy import Column, Integer, String, Float, create_engine
 from sqlalchemy.orm import declarative_base, Session
@@ -175,7 +175,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def run_macroni_manual(self, path, xid, interval) -> None:
         """When called, it will run the script at <path> and calls reset_next_run() with <xid>, <interval>"""
-        call(["python", path])
+        run(["pythonw", path])
         logging.info(f"Manual run -> ID: {xid} - Interval: {interval}")
         self.reset_next_run(xid, interval)
 
@@ -187,7 +187,7 @@ class MainWindow(QtWidgets.QMainWindow):
             for macroni in macronis:
                 if datetime.datetime.now().timestamp() >= macroni.next_run:
                     logging.info(f"Autorun-> ID: {macroni.id} - Interval: {macroni.interval}")
-                    call(["python", macroni.path])
+                    run(["pythonw", macroni.path])
                     self.reset_next_run(macroni.id, macroni.interval)
 
     # noinspection PyMethodMayBeStatic
@@ -239,7 +239,7 @@ class AddDialog(QtWidgets.QDialog):
 
     def select_script(self) -> None:
         """Opens a filedialog to pick a python script and set its path to the correct label."""
-        path_name = QtWidgets.QFileDialog.getOpenFileName(self, "Select Script", "c:\\", "Python files (*.py)")
+        path_name = QtWidgets.QFileDialog.getOpenFileName(self, "Select Script", "c:\\", "Python files (*.py *pyw)")
         self.add_dialog.edit_path.setText(path_name[0])
 
     def add_to_db(self):
