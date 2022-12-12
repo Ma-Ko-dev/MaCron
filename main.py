@@ -174,6 +174,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 row += 1
 
     def run_macroni_manual(self, path, xid, interval) -> None:
+        # TODO: Add something to the log if a script produced an error
         """When called, it will run the script at <path> and calls reset_next_run() with <xid>, <interval>"""
         run(["pythonw", path])
         logging.info(f"Manual run -> ID: {xid} - Interval: {interval}")
