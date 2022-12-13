@@ -1,9 +1,12 @@
-import time
-
 from plyer import notification
 from PIL import Image
+import time
 import requests
 import os
+
+# This test script can sometimes cause an error. It's because the cat facts can be pretty long and the notification
+# message has a certain limit. This is, of course, fixable, but I leave it in, so it will raise an error and MaCron can
+# handle it.
 
 CATPIC_API = "https://cataas.com/cat"
 CATFACT_API = "https://meowfacts.herokuapp.com/"
