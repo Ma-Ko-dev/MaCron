@@ -112,6 +112,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.setWindowTitle(f"{self.title} - {datetime.datetime.now().strftime('%H:%M:%S')}")
         self.run_macroni()
 
+    # noinspection PyMethodMayBeStatic
     def theme_dark(self) -> None:
         """Changes the current color theme to dark."""
         app.setStyleSheet(qdarkstyle.load_stylesheet(palette=qdarkstyle.DarkPalette))
@@ -119,6 +120,7 @@ class MainWindow(QtWidgets.QMainWindow):
         with open("config.ini", mode="w") as file:
             config.write(file)
 
+    # noinspection PyMethodMayBeStatic
     def theme_light(self) -> None:
         """Changes the current color theme to light."""
         app.setStyleSheet(qdarkstyle.load_stylesheet(palette=qdarkstyle.LightPalette))
@@ -327,7 +329,7 @@ class EntryWidget(QtWidgets.QWidget):
 
 
 def create_default_ini():
-    # creating a ini with some default values
+    # creating an ini with some default values
     new_config = configparser.ConfigParser()
     # default theme is dark and the default value for the script path is the current working directory. This feature is
     # not implemented yet.
