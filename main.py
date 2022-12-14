@@ -192,6 +192,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.reset_next_run(xid, interval)
 
     def run_macroni(self) -> None:
+        # TODO: Add a notification to the title to alert the user that an error happened and to suggest to check the
+        #  log file. Also add a "view log" button, a reset button and an info button for some program related infos.
         """Queries the database to get all entries and checks if the current time is bigger or equal to the next_run
         variable. If this is true, the Script will be executed and reset_next_run() is called for this entry."""
         with Session(engine) as session:
