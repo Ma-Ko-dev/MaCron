@@ -317,11 +317,6 @@ class AddDialog(QtWidgets.QDialog):
             msg.setStandardButtons(QtWidgets.QMessageBox.Ok)
             msg.exec_()
 
-    def check_ini(self):
-        read_ini = configparser.ConfigParser()
-        read_ini.read("config.ini")
-        settings = read_ini["MaCron Settings"]
-
 
 class EntryWidget(QtWidgets.QWidget):
     """Acts as the entry for the main GUI"""
