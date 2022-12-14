@@ -4,6 +4,7 @@ import subprocess
 import sys
 import qdarkstyle
 import logging
+import configparser
 
 from subprocess import run
 from sqlalchemy import Column, Integer, String, Float, create_engine
@@ -13,14 +14,6 @@ from UI import entryWidget, mainWindow, addDialog
 
 # for now the minimum interval is 60 seconds
 MINIMUM_INTERVAL = 60
-
-# check for log folder
-if not os.path.exists("logs"):
-    os.makedirs("logs")
-
-# check if config file exists
-if not os.path.exists("config.cfg"):
-    print("db does not exist")
 
 # db setup
 base = declarative_base()
@@ -53,6 +46,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.setupUi(self)
         self.entry_ids = []
         self.title = self.windowTitle()
+        self.get_theme()
 
         # setting up the tray
         self.tray = QtWidgets.QSystemTrayIcon()
@@ -120,11 +114,17 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def theme_dark(self) -> None:
         """Changes the current color theme to dark."""
-        self.setStyleSheet(qdarkstyle.load_stylesheet(palette=qdarkstyle.DarkPalette))
+        app.setStyleSheet(qdarkstyle.load_stylesheet(palette=qdarkstyle.DarkPalette))
+        settings["theme"] = "dark"
+        with open("config.ini", mode="w") as file:
+            config.write(file)
 
     def theme_light(self) -> None:
         """Changes the current color theme to light."""
-        self.setStyleSheet(qdarkstyle.load_stylesheet(palette=qdarkstyle.LightPalette))
+        app.setStyleSheet(qdarkstyle.load_stylesheet(palette=qdarkstyle.LightPalette))
+        settings["theme"] = "light"
+        with open("config.ini", mode="w") as file:
+            config.write(file)
 
     def open_dialog(self, xid: int) -> None:
         """Opens the dialog to add or edit a new Script. If xid is given, it will look up the id in the
@@ -226,6 +226,12 @@ class MainWindow(QtWidgets.QMainWindow):
         secs = interval
         return int(days), int(hours), int(mins), int(secs)
 
+    def get_theme(self):
+        if settings["theme"] == "dark":
+            self.theme_dark()
+        else:
+            self.theme_light()
+
 
 class AddDialog(QtWidgets.QDialog):
     """Works as the dialog that pops up when the edit or add button is clicked."""
@@ -233,9 +239,10 @@ class AddDialog(QtWidgets.QDialog):
         super(AddDialog, self).__init__(*args, **kwargs)
         self.add_dialog = addDialog.Ui_Dialog()
         self.add_dialog.setupUi(self)
+        # self.check_ini()
+
         # remove the question mark
         self.setWindowFlags(self.windowFlags() ^ QtCore.Qt.WindowContextHelpButtonHint)
-        # self.setWindowFlags(self.windowFlags() ^ QtCore.Qt.WindowCloseButtonHint)
 
         # we need this to make sure to know when to add and when to edit an entry
         self.edit = False
@@ -253,6 +260,8 @@ class AddDialog(QtWidgets.QDialog):
 
     def select_script(self) -> None:
         """Opens a filedialog to pick a python script and set its path to the correct label."""
+        # TODO: Implement the path value from the ini file so the start is by default always the current working
+        #  directory and otherwise the last path that was used.
         path_name = QtWidgets.QFileDialog.getOpenFileName(self, "Select Script", "c:\\", "Python files (*.py *pyw)")
         self.add_dialog.edit_path.setText(path_name[0])
 
@@ -308,6 +317,11 @@ class AddDialog(QtWidgets.QDialog):
             msg.setStandardButtons(QtWidgets.QMessageBox.Ok)
             msg.exec_()
 
+    def check_ini(self):
+        read_ini = configparser.ConfigParser()
+        read_ini.read("config.ini")
+        settings = read_ini["MaCron Settings"]
+
 
 class EntryWidget(QtWidgets.QWidget):
     """Acts as the entry for the main GUI"""
@@ -317,12 +331,37 @@ class EntryWidget(QtWidgets.QWidget):
         self.entry_ui.setupUi(self)
 
 
+def create_default_ini():
+    # creating a ini with some default values
+    new_config = configparser.ConfigParser()
+    # default theme is dark and the default value for the script path is the current working directory. This feature is
+    # not implemented yet.
+    new_config["MaCron Settings"] = {
+        "theme": "dark",
+        "last_path": os.getcwd()
+    }
+    with open("config.ini", mode="w") as file:
+        new_config.write(file)
+
+
 if __name__ == "__main__":
+    # check for log folder, create one if non is found
+    if not os.path.exists("logs"):
+        os.makedirs("logs")
+
+    # check if ini file exists, call function to create default one
+    if not os.path.exists("config.ini"):
+        create_default_ini()
+
+    # creating configparser for future reference
+    config = configparser.ConfigParser()
+    config.read("config.ini")
+    settings = config["MaCron Settings"]
+
+    # basic setup
     base.metadata.create_all(engine)
     app = QtWidgets.QApplication([])
     mainWin = MainWindow()
-    # TODO: save and load last used theme here
-    app.setStyleSheet(qdarkstyle.load_stylesheet(palette=qdarkstyle.DarkPalette))
 
     mainWin.show()
     app.exec()
