@@ -163,3 +163,4 @@ cython_debug/
 *.db
 *.qrc
 *.env
+/steam_game_count.csv

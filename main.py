@@ -53,6 +53,7 @@ class MainWindow(QtWidgets.QMainWindow):
         # setting up the tray
         # TODO: Add some form of tooltip when hovering your mouse over the tray icon.
         self.tray = QtWidgets.QSystemTrayIcon()
+        self.tray.setToolTip(self.title)
         self.tray_icon = QtGui.QIcon(QtGui.QPixmap(":/icons/assets/icons/macaron_flaticon-com.ico"))
         self.tray.setIcon(self.tray_icon)
 
