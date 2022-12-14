@@ -4,8 +4,8 @@ import subprocess
 import sys
 import qdarkstyle
 import logging
-from subprocess import run
 
+from subprocess import run
 from sqlalchemy import Column, Integer, String, Float, create_engine
 from sqlalchemy.orm import declarative_base, Session
 from PyQt5 import QtWidgets, QtCore, QtGui
@@ -17,6 +17,10 @@ MINIMUM_INTERVAL = 60
 # check for log folder
 if not os.path.exists("logs"):
     os.makedirs("logs")
+
+# check if config file exists
+if not os.path.exists("config.cfg"):
+    print("db does not exist")
 
 # db setup
 base = declarative_base()
@@ -51,7 +55,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.title = self.windowTitle()
 
         # setting up the tray
-        # TODO: Add some form of tooltip when hovering your mouse over the tray icon.
         self.tray = QtWidgets.QSystemTrayIcon()
         self.tray.setToolTip(self.title)
         self.tray_icon = QtGui.QIcon(QtGui.QPixmap(":/icons/assets/icons/macaron_flaticon-com.ico"))
@@ -72,7 +75,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.tray_menu.addAction(self.tray_exit)
 
         self.tray.setContextMenu(self.tray_menu)
-        # TODO: Bring the window to the foreground when clicked
         self.tray.activated.connect(self.tray_activated)
         self.tray.show()
 
@@ -94,7 +96,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.btn_addScript.clicked.connect(self.open_dialog)
 
     def changeEvent(self, event) -> None:
-        """Checks if the event comes from minimizing and hides the window."""
+        """Check if the event comes from minimizing and hides the window."""
         if event.type() == QtCore.QEvent.WindowStateChange:
             if event.oldState() == QtCore.Qt.WindowNoState or self.windowState() == QtCore.Qt.WindowMaximized:
                 self.hide()
@@ -102,7 +104,8 @@ class MainWindow(QtWidgets.QMainWindow):
     def tray_activated(self, reason) -> None:
         """Check if the tray icon got clicked once or doubleClicked and then brings the window back."""
         if reason == 2 or reason == 3:
-            self.show()
+            self.showMinimized()
+            self.setWindowState(self.windowState() and (not QtCore.Qt.WindowMinimized or QtCore.Qt.WindowActive))
 
     # noinspection PyMethodMayBeStatic
     def exit(self) -> None:
