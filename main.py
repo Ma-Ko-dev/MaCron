@@ -264,12 +264,15 @@ class AddDialog(QtWidgets.QDialog):
 
     def select_script(self) -> None:
         """Opens a filedialog to pick a python script and set its path to the correct label."""
-        # TODO: Implement the path value from the ini file so the start is by default always the current working
-        #  directory and otherwise the last path that was used.
-        path_name = QtWidgets.QFileDialog.getOpenFileName(self, "Select Script", "c:\\", "Python files (*.py *pyw)")
+        path_name = QtWidgets.QFileDialog.getOpenFileName(self, "Select Script", settings["last_path"],
+                                                          "Python files (*.py *pyw)")
         self.add_dialog.edit_path.setText(path_name[0])
+        settings["last_path"] = os.path.dirname(path_name[0])
+        with open("config.ini", mode="w") as file:
+            config.write(file)
 
     def add_to_db(self):
+        # TODO: Let the script run once after it got added
         """Adds a new entry to the database. It will take data from all given fields and first checks if nothing is
         empty, if any is empty it will display an info popup with some information. When all fields have data, it will
         then check if <edit> is true to determine if it has to update an entry or create a new one. In the end it will
