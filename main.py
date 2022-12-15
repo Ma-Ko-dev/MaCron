@@ -184,7 +184,10 @@ class MainWindow(QtWidgets.QMainWindow):
     def run_macroni_manual(self, path, xid, interval) -> None:
         """When called, it will run the script at <path> and calls reset_next_run() with <xid>, <interval>"""
         try:
-            run(["pythonw", path], check=True, capture_output=True)
+            if os.path.splitext(path)[1] == ".py":  # type: ignore
+                run(["python", path], check=True, capture_output=True)
+            else:
+                run(["pythonw", path], check=True, capture_output=True)
         except subprocess.CalledProcessError as e:
             logging.error(f"Manual run-> ID: {xid} | {path}\nReturncode: {e.returncode}, Output: {e.output}\n"
                           f"{e.stderr.decode('utf-8')}")
@@ -201,7 +204,10 @@ class MainWindow(QtWidgets.QMainWindow):
             for macroni in macronis:
                 if datetime.datetime.now().timestamp() >= macroni.next_run:
                     try:
-                        run(["pythonw", macroni.path], check=True, capture_output=True)
+                        if os.path.splitext(macroni.path)[1] == ".py":  # type: ignore
+                            run(["python", macroni.path], check=True, capture_output=True)
+                        else:
+                            run(["pythonw", macroni.path], check=True, capture_output=True)
                     except subprocess.CalledProcessError as e:
                         logging.error(f"Autorun-> ID: {macroni.id} | {macroni.path}\n {e.returncode}, Output: "
                                       f"{e.output}\n{e.stderr.decode('utf-8')}")
@@ -272,7 +278,6 @@ class AddDialog(QtWidgets.QDialog):
             config.write(file)
 
     def add_to_db(self):
-        # TODO: Let the script run once after it got added
         """Adds a new entry to the database. It will take data from all given fields and first checks if nothing is
         empty, if any is empty it will display an info popup with some information. When all fields have data, it will
         then check if <edit> is true to determine if it has to update an entry or create a new one. In the end it will
@@ -302,7 +307,9 @@ class AddDialog(QtWidgets.QDialog):
                     macroni.name = name
                     macroni.path = path
                     macroni.interval = interval
-                    new_run = datetime.datetime.now() + datetime.timedelta(seconds=interval)
+                    # a newly added script will run after it got added, an edited one will not
+                    # new_run = datetime.datetime.now() + datetime.timedelta(seconds=interval)
+                    new_run = datetime.datetime.now()
                     macroni.next_run = new_run.timestamp()
                     session.add_all([macroni])
                     session.commit()

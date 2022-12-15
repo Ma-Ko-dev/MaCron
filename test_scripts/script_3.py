@@ -1,1 +1,1 @@
-print("I dont know what to do")
+raise "Hello World"
