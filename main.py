@@ -92,7 +92,8 @@ class MainWindow(QtWidgets.QMainWindow):
     def changeEvent(self, event) -> None:
         """Check if the event comes from minimizing and hides the window."""
         if event.type() == QtCore.QEvent.WindowStateChange:
-            if event.oldState() == QtCore.Qt.WindowNoState or self.windowState() == QtCore.Qt.WindowMaximized:
+            if event.oldState() == QtCore.Qt.WindowNoState or not self.windowState() == QtCore.Qt.WindowMaximized:
+                print("test")
                 self.hide()
 
     def tray_activated(self, reason) -> None:
@@ -100,6 +101,7 @@ class MainWindow(QtWidgets.QMainWindow):
         if reason == 2 or reason == 3:
             self.showMinimized()
             self.setWindowState(self.windowState() and (not QtCore.Qt.WindowMinimized or QtCore.Qt.WindowActive))
+            self.show()
 
     # noinspection PyMethodMayBeStatic
     def exit(self) -> None:
