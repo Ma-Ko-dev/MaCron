@@ -48,6 +48,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.entry_ids = []
         self.title = self.windowTitle()
         self.get_theme()
+        self.notify_error = False
 
         # setting up the tray
         self.tray = QtWidgets.QSystemTrayIcon()
@@ -87,6 +88,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.menu_action_add.triggered.connect(self.open_dialog)
         self.ui.menu_theme_dark.triggered.connect(self.theme_dark)
         self.ui.menu_theme_light.triggered.connect(self.theme_light)
+        self.ui.menu_action_open_log.triggered.connect(self.open_logfile)
         # Button connections
         self.ui.btn_addScript.clicked.connect(self.open_dialog)
 
@@ -245,6 +247,11 @@ class MainWindow(QtWidgets.QMainWindow):
             self.theme_dark()
         else:
             self.theme_light()
+
+    def open_logfile(self):
+        """Open the local Logfile with the default editor"""
+        path = os.path.join(os.getcwd(), "logs", "log.log")
+        os.startfile(path)
 
 
 class AddDialog(QtWidgets.QDialog):
