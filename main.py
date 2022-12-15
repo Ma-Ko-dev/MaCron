@@ -5,6 +5,7 @@ import sys
 import qdarkstyle
 import logging
 import configparser
+import winsound
 
 from subprocess import run
 from sqlalchemy import Column, Integer, String, Float, create_engine
@@ -89,6 +90,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.menu_theme_dark.triggered.connect(self.theme_dark)
         self.ui.menu_theme_light.triggered.connect(self.theme_light)
         self.ui.menu_action_open_log.triggered.connect(self.open_logfile)
+        self.ui.menu_action_reset_log.triggered.connect(self.reset_alert)
         # Button connections
         self.ui.btn_addScript.clicked.connect(self.open_dialog)
 
@@ -96,7 +98,6 @@ class MainWindow(QtWidgets.QMainWindow):
         """Check if the event comes from minimizing and hides the window."""
         if event.type() == QtCore.QEvent.WindowStateChange:
             if event.oldState() == QtCore.Qt.WindowNoState or not self.windowState() == QtCore.Qt.WindowMaximized:
-                print("test")
                 self.hide()
 
     def tray_activated(self, reason) -> None:
@@ -114,7 +115,11 @@ class MainWindow(QtWidgets.QMainWindow):
     def update_title(self) -> None:
         """Will get called every second by a timer, updates the title with the current time and then calls
         the method run_macroni() to see if any script should be executed."""
-        self.setWindowTitle(f"{self.title} - {datetime.datetime.now().strftime('%H:%M:%S')}")
+        if self.notify_error:
+            self.setWindowTitle(f"{self.title} - {datetime.datetime.now().strftime('%H:%M:%S')} - !!! ONE OR MORE "
+                                f"SCRIPTS PRODUCED AN ERROR! Please see logs for more Information! !!!")
+        else:
+            self.setWindowTitle(f"{self.title} - {datetime.datetime.now().strftime('%H:%M:%S')}")
         self.run_macroni()
 
     # noinspection PyMethodMayBeStatic
@@ -197,6 +202,8 @@ class MainWindow(QtWidgets.QMainWindow):
         except subprocess.CalledProcessError as e:
             logging.error(f"Manual run-> ID: {xid} | {path}\nReturncode: {e.returncode}, Output: {e.output}\n"
                           f"{e.stderr.decode('utf-8')}")
+            self.notify_error = True
+            winsound.PlaySound("SystemExclamation", winsound.SND_ALIAS)
         logging.info(f"Manual run-> ID: {xid} - Interval: {interval}")
         self.reset_next_run(xid, interval)
 
@@ -217,6 +224,8 @@ class MainWindow(QtWidgets.QMainWindow):
                     except subprocess.CalledProcessError as e:
                         logging.error(f"Autorun-> ID: {macroni.id} | {macroni.path}\n {e.returncode}, Output: "
                                       f"{e.output}\n{e.stderr.decode('utf-8')}")
+                        self.notify_error = True
+                        winsound.PlaySound("SystemExclamation", winsound.SND_ALIAS)
                     logging.info(f"Autorun-> ID: {macroni.id} - Interval: {macroni.interval}")
                     self.reset_next_run(macroni.id, macroni.interval)
 
@@ -248,6 +257,11 @@ class MainWindow(QtWidgets.QMainWindow):
         else:
             self.theme_light()
 
+    def reset_alert(self):
+        self.notify_error = False
+        self.update_title()
+
+    # noinspection PyMethodMayBeStatic
     def open_logfile(self):
         """Open the local Logfile with the default editor"""
         path = os.path.join(os.getcwd(), "logs", "log.log")
