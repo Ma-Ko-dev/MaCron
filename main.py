@@ -40,6 +40,7 @@ class Macroni(base):
 class MainWindow(QtWidgets.QMainWindow):
     """Handles all MainWindow related tasks. It will create a window from UI.mainWindow which was created
     with the Qt Designer."""
+
     def __init__(self, *args, **kwargs):
         super(MainWindow, self).__init__(*args, **kwargs)
         self.ui = mainWindow.Ui_MainWindow()
@@ -177,8 +178,9 @@ class MainWindow(QtWidgets.QMainWindow):
                                                               self.delete_entry(entry_id))
                     entry.entry_ui.btn_edit.clicked.connect(lambda state, entry_id=entry.row_id:
                                                             self.open_dialog(entry_id))
-                    entry.entry_ui.btn_run.clicked.connect(lambda state, path=macroni.path:
-                                                           self.run_macroni_manual(path, macroni.id, macroni.interval))
+                    entry.entry_ui.btn_run.clicked.connect(lambda state, path=macroni.path, xid=macroni.id,
+                                                           interval=macroni.interval:
+                                                           self.run_macroni_manual(path, xid, interval))
                     self.entry_ids.append(entry.row_id)
                     self.ui.gridLayout.addWidget(entry, row, 0)
                 row += 1
@@ -247,6 +249,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
 class AddDialog(QtWidgets.QDialog):
     """Works as the dialog that pops up when the edit or add button is clicked."""
+
     def __init__(self, *args, **kwargs):
         super(AddDialog, self).__init__(*args, **kwargs)
         self.add_dialog = addDialog.Ui_Dialog()
@@ -336,6 +339,7 @@ class AddDialog(QtWidgets.QDialog):
 
 class EntryWidget(QtWidgets.QWidget):
     """Acts as the entry for the main GUI"""
+
     def __init__(self, *args, **kwargs):
         super(EntryWidget, self).__init__(*args, **kwargs)
         self.entry_ui = entryWidget.Ui_Form()
