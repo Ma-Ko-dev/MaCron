@@ -62,14 +62,14 @@ class MainWindow(QtWidgets.QMainWindow):
         self.tray_exit = QtWidgets.QAction("Quit", self)
         self.tray_show = QtWidgets.QAction("Show", self)
 
-        self.tray_show.triggered.connect(self.show)
-        self.tray_exit.triggered.connect(self.exit)
+        self.tray_show.triggered.connect(self.show)  # type: ignore
+        self.tray_exit.triggered.connect(self.exit)  # type: ignore
 
         self.tray_menu.addAction(self.tray_show)
         self.tray_menu.addAction(self.tray_exit)
 
         self.tray.setContextMenu(self.tray_menu)
-        self.tray.activated.connect(self.tray_activated)
+        self.tray.activated.connect(self.tray_activated)  # type: ignore
         self.tray.show()
 
         # setting up the timer
