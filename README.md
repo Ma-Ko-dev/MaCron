@@ -1,4 +1,9 @@
 # MaCron
+![GitHub issues](https://img.shields.io/github/issues/Ma-Ko-Dev/MaCron?style=plastic)
+![GitHub top language](https://img.shields.io/github/languages/top/Ma-Ko-Dev/MaCron?style=plastic)
+![GitHub all releases](https://img.shields.io/github/downloads/Ma-Ko-Dev/MaCron/total?style=plastic)
+![GitHub contributors](https://img.shields.io/github/contributors/Ma-Ko-Dev/Macron?style=plastic)
+<br>
 This tool lets you run and Schedule your Python Scripts right from your PC.
 <br>
 Check out the Flowchart folder for some more or less useful Flowcharts. They are from the very beginning and helped me visualize my ideas and the workflow.
