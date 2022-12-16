@@ -126,12 +126,14 @@ class MainWindow(QtWidgets.QMainWindow):
     def update_title(self) -> None:
         """Will get called every second by a timer, updates the title with the current time and then calls
         the method run_macroni() to see if any script should be executed."""
-        # TODO: Update tray title too
         if self.notify_error:
             self.setWindowTitle(f"{self.title} - {datetime.datetime.now().strftime('%H:%M:%S')} - !!! ONE OR MORE "
                                 f"SCRIPTS PRODUCED AN ERROR! Please see logs for more Information! !!!")
+            self.tray.setToolTip(f"{self.title} - {datetime.datetime.now().strftime('%H:%M:%S')} - !!! ONE OR MORE "
+                                 f"SCRIPTS PRODUCED AN ERROR! Please see logs for more Information! !!!")
         else:
             self.setWindowTitle(f"{self.title} - {datetime.datetime.now().strftime('%H:%M:%S')}")
+            self.tray.setToolTip(f"{self.title} - {datetime.datetime.now().strftime('%H:%M:%S')}")
         self.run_macroni()
 
     # noinspection PyMethodMayBeStatic
