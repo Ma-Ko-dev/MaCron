@@ -5,7 +5,8 @@ import sys
 import qdarkstyle
 import logging
 import configparser
-import winsound
+# winsound will later be used
+# import winsound
 
 from subprocess import run
 from sqlalchemy import Column, Integer, String, Float, create_engine
@@ -52,7 +53,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.notify_error = False
 
         # setting up the tray
-        # TODO: Add Icons to the trayIcon submenu
         self.tray = QtWidgets.QSystemTrayIcon()
         self.tray.setToolTip(self.title)
         self.tray_icon = QtGui.QIcon(QtGui.QPixmap(":/icons/assets/icons/macaron_flaticon-com.ico"))
@@ -64,9 +64,16 @@ class MainWindow(QtWidgets.QMainWindow):
         self.tray_menu.setFont(self.tray_font)
 
         self.tray_exit = QtWidgets.QAction("Quit", self)
-        self.tray_show = QtWidgets.QAction("Show", self)
+        self.tray_exit_icon = QtGui.QIcon()
+        self.tray_exit_icon.addPixmap(QtGui.QPixmap(":/icons/assets/icons/cross-circle.png"))
+        self.tray_exit.setIcon(self.tray_exit_icon)
 
-        self.tray_show.triggered.connect(self.show)  # type: ignore
+        self.tray_show = QtWidgets.QAction("Show", self)
+        self.tray_show_icon = QtGui.QIcon()
+        self.tray_show_icon.addPixmap(QtGui.QPixmap(":/icons/assets/icons/macaron_flaticon-com.ico"))
+        self.tray_show.setIcon(self.tray_show_icon)
+
+        self.tray_show.triggered.connect(self.tray_activated)  # type: ignore
         self.tray_exit.triggered.connect(self.exit)  # type: ignore
 
         self.tray_menu.addAction(self.tray_show)
@@ -92,6 +99,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.menu_theme_light.triggered.connect(self.theme_light)
         self.ui.menu_action_open_log.triggered.connect(self.open_logfile)
         self.ui.menu_action_reset_log.triggered.connect(self.reset_alert)
+        # TODO: Add "About" button
+        # self.ui.menuac
+        # TODO: Add "Check for Update" button
         # Button connections
         self.ui.btn_addScript.clicked.connect(self.open_dialog)
 
@@ -103,7 +113,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def tray_activated(self, reason) -> None:
         """Check if the tray icon got clicked once or doubleClicked and then brings the window back."""
-        if reason == 2 or reason == 3:
+        print(reason)
+        if reason == 2 or reason == 3 or not reason:
             self.showMinimized()
             self.setWindowState(self.windowState() and (not QtCore.Qt.WindowMinimized or QtCore.Qt.WindowActive))
             self.show()
@@ -122,6 +133,9 @@ class MainWindow(QtWidgets.QMainWindow):
         else:
             self.setWindowTitle(f"{self.title} - {datetime.datetime.now().strftime('%H:%M:%S')}")
         self.run_macroni()
+
+    def menu_about(self):
+        pass
 
     # noinspection PyMethodMayBeStatic
     def theme_dark(self) -> None:
@@ -204,7 +218,8 @@ class MainWindow(QtWidgets.QMainWindow):
             logging.error(f"Manual run-> ID: {xid} | {path}\nReturncode: {e.returncode}, Output: {e.output}\n"
                           f"{e.stderr.decode('utf-8')}")
             self.notify_error = True
-            winsound.PlaySound("SystemExclamation", winsound.SND_ALIAS)
+            # Removed sound for now because it freezes the GUI
+            # winsound.PlaySound("SystemExclamation", winsound.SND_ALIAS)
         logging.info(f"Manual run-> ID: {xid} - Interval: {interval}")
         self.reset_next_run(xid, interval)
 
@@ -224,7 +239,8 @@ class MainWindow(QtWidgets.QMainWindow):
                         logging.error(f"Autorun-> ID: {macroni.id} | {macroni.path}\n {e.returncode}, Output: "
                                       f"{e.output}\n{e.stderr.decode('utf-8')}")
                         self.notify_error = True
-                        winsound.PlaySound("SystemExclamation", winsound.SND_ALIAS)
+                        # Removed sound for now because it freezes the GUI
+                        # winsound.PlaySound("SystemExclamation", winsound.SND_ALIAS)
                     logging.info(f"Autorun-> ID: {macroni.id} - Interval: {macroni.interval}")
                     self.reset_next_run(macroni.id, macroni.interval)
 
