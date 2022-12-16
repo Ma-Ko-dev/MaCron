@@ -99,8 +99,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.menu_theme_light.triggered.connect(self.theme_light)
         self.ui.menu_action_open_log.triggered.connect(self.open_logfile)
         self.ui.menu_action_reset_log.triggered.connect(self.reset_alert)
-        # TODO: Add "About" button
-        # self.ui.menuac
+        self.ui.menu_action_about.triggered.connect(self.menu_about)
         # TODO: Add "Check for Update" button
         # Button connections
         self.ui.btn_addScript.clicked.connect(self.open_dialog)
@@ -127,6 +126,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def update_title(self) -> None:
         """Will get called every second by a timer, updates the title with the current time and then calls
         the method run_macroni() to see if any script should be executed."""
+        # TODO: Update tray title too
         if self.notify_error:
             self.setWindowTitle(f"{self.title} - {datetime.datetime.now().strftime('%H:%M:%S')} - !!! ONE OR MORE "
                                 f"SCRIPTS PRODUCED AN ERROR! Please see logs for more Information! !!!")
@@ -134,8 +134,24 @@ class MainWindow(QtWidgets.QMainWindow):
             self.setWindowTitle(f"{self.title} - {datetime.datetime.now().strftime('%H:%M:%S')}")
         self.run_macroni()
 
+    # noinspection PyMethodMayBeStatic
     def menu_about(self):
-        pass
+        """Will display some Information about the Program, its creator and used outside resources."""
+        icon = QtGui.QIcon()
+        icon.addPixmap(QtGui.QPixmap(":/icons/assets/icons/macaron_flaticon-com.ico"))
+
+        msg = QtWidgets.QMessageBox()
+        msg.setWindowIcon(icon)
+        msg.setIcon(QtWidgets.QMessageBox.Information)
+        msg.setText(f"You are using MaCron Version xxx.\n"
+                    f"MaCron was created by Mathias K. You can find more of his work on his GitHub Profile, linked "
+                    f"down below.\n\n"
+                    f"The Menubar Icons come from Yusuke Kamiyamane.\n"
+                    f"The Window Icon (the two Macarons) come from Gohsantosadrive.")
+        msg.setInformativeText(f"<a href='https://github.com/Ma-Ko-dev'>Mathias K. - Ma-Ko-dev on Github")
+        msg.setWindowTitle(f"Macron Version xxx")
+        msg.setStandardButtons(QtWidgets.QMessageBox.Ok)
+        msg.exec_()
 
     # noinspection PyMethodMayBeStatic
     def theme_dark(self) -> None:
