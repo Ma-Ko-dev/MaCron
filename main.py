@@ -76,7 +76,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.setupUi(self)
         self.entry_ids = []
         self.title = f"MaCron - {VERSION}"
-        self.get_theme()
+        self.set_theme()
         self.notify_error = False
 
         # setting up the tray
@@ -310,13 +310,15 @@ class MainWindow(QtWidgets.QMainWindow):
         secs = interval
         return int(days), int(hours), int(mins), int(secs)
 
-    def get_theme(self):
+    def set_theme(self):
+        """Will set the theme depending on what is saved in the ini file."""
         if settings["theme"] == "dark":
             self.theme_dark()
         else:
             self.theme_light()
 
     def reset_alert(self):
+        """Resets the Alert and calls the update_title function immediately after"""
         self.notify_error = False
         self.update_title()
 
@@ -429,8 +431,7 @@ class EntryWidget(QtWidgets.QWidget):
 def create_default_ini():
     # creating an ini with some default values
     new_config = configparser.ConfigParser()
-    # default theme is dark and the default value for the script path is the current working directory. This feature is
-    # not implemented yet.
+    # default theme is dark and the default value for the script path is the current working directory.
     new_config["MaCron Settings"] = {
         "theme": "dark",
         "last_path": os.getcwd()
@@ -456,7 +457,7 @@ if __name__ == "__main__":
     config.read("config.ini")
     settings = config["MaCron Settings"]
 
-    # basic setup
+    # basic gui setup
     base.metadata.create_all(engine)
     app = QtWidgets.QApplication([])
     mainWin = MainWindow()
