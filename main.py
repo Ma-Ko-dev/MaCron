@@ -2,9 +2,11 @@ import datetime
 import os.path
 import subprocess
 import sys
+import webbrowser
 import qdarkstyle
 import logging
 import configparser
+import requests
 # winsound will later be used
 # import winsound
 
@@ -14,8 +16,13 @@ from sqlalchemy.orm import declarative_base, Session
 from PyQt5 import QtWidgets, QtCore, QtGui
 from UI import entryWidget, mainWindow, addDialog
 
-# for now the minimum interval is 60 seconds
+# configs
 MINIMUM_INTERVAL = 60
+VERSION = "v1.0.0"
+HOMEPAGE = "https://github.com/Ma-Ko-dev/MaCron/releases"
+OWNER = "Ma-Ko-Dev"
+REPO = "MaCron"
+API_URL = f"https://api.github.com/repos/{OWNER}/{REPO}/releases/latest"
 
 # db setup
 base = declarative_base()
@@ -24,6 +31,26 @@ engine = create_engine("sqlite:///database.db")
 logging.basicConfig(filename="logs/log.log", filemode="w", level=logging.DEBUG,
                     format="%(asctime)s|%(levelname)s|%(funcName)s|%(message)s",
                     datefmt="%d.%m.%Y-%H:%M:%S")
+
+
+def check_version():
+    try:
+        request_version = requests.get(API_URL).json()["tag_name"]
+    except LookupError:
+        logging.error("Error while checking for new Version.")
+    else:
+        if request_version != VERSION:
+            icon = QtGui.QIcon()
+            icon.addPixmap(QtGui.QPixmap(":/icons/assets/icons/macaron_flaticon-com.ico"))
+
+            msg = QtWidgets.QMessageBox()
+            msg.setWindowIcon(icon)
+            msg.setIcon(QtWidgets.QMessageBox.Information)
+            msg.setText("A new Version is available. Your default Browser will now open.")
+            msg.setWindowTitle("New MaCron version available!")
+            msg.setStandardButtons(QtWidgets.QMessageBox.Ok)
+            msg.exec_()
+            webbrowser.open(HOMEPAGE)
 
 
 class Macroni(base):
@@ -48,7 +75,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui = mainWindow.Ui_MainWindow()
         self.ui.setupUi(self)
         self.entry_ids = []
-        self.title = self.windowTitle()
+        self.title = f"MaCron - {VERSION}"
         self.get_theme()
         self.notify_error = False
 
@@ -100,7 +127,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.menu_action_open_log.triggered.connect(self.open_logfile)
         self.ui.menu_action_reset_log.triggered.connect(self.reset_alert)
         self.ui.menu_action_about.triggered.connect(self.menu_about)
-        # TODO: Add "Check for Update" button
+        self.ui.menu_action_update.triggered.connect(check_version)
         # Button connections
         self.ui.btn_addScript.clicked.connect(self.open_dialog)
 
@@ -112,7 +139,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def tray_activated(self, reason) -> None:
         """Check if the tray icon got clicked once or doubleClicked and then brings the window back."""
-        print(reason)
         if reason == 2 or reason == 3 or not reason:
             self.showMinimized()
             self.setWindowState(self.windowState() and (not QtCore.Qt.WindowMinimized or QtCore.Qt.WindowActive))
@@ -145,13 +171,13 @@ class MainWindow(QtWidgets.QMainWindow):
         msg = QtWidgets.QMessageBox()
         msg.setWindowIcon(icon)
         msg.setIcon(QtWidgets.QMessageBox.Information)
-        msg.setText(f"You are using MaCron Version xxx.\n"
+        msg.setText(f"You are using MaCron Version {VERSION}.\n"
                     f"MaCron was created by Mathias K. You can find more of his work on his GitHub Profile, linked "
                     f"down below.\n\n"
                     f"The Menubar Icons come from Yusuke Kamiyamane.\n"
                     f"The Window Icon (the two Macarons) come from Gohsantosadrive.")
         msg.setInformativeText(f"<a href='https://github.com/Ma-Ko-dev'>Mathias K. - Ma-Ko-dev on Github")
-        msg.setWindowTitle(f"Macron Version xxx")
+        msg.setWindowTitle(f"MaCron Version {VERSION}")
         msg.setStandardButtons(QtWidgets.QMessageBox.Ok)
         msg.exec_()
 
@@ -421,6 +447,9 @@ if __name__ == "__main__":
     # check if ini file exists, call function to create default one
     if not os.path.exists("config.ini"):
         create_default_ini()
+
+    # check version once
+    check_version()
 
     # creating configparser for future reference
     config = configparser.ConfigParser()
