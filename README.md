@@ -3,6 +3,9 @@
 ![GitHub top language](https://img.shields.io/github/languages/top/Ma-Ko-Dev/MaCron?style=plastic)
 ![GitHub all releases](https://img.shields.io/github/downloads/Ma-Ko-Dev/MaCron/total?style=plastic)
 ![GitHub contributors](https://img.shields.io/github/contributors/Ma-Ko-Dev/Macron?style=plastic)
+![GitHub watchers](https://img.shields.io/github/watchers/ma-ko-dev/macron?style=plastic)
+![GitHub Repo stars](https://img.shields.io/github/stars/Ma-Ko-dev/MaCron?style=plastic)
+![GitHub forks](https://img.shields.io/github/forks/ma-ko-dev/macron?style=plastic)
 
 MaCron is a simple, lightweight utility for scheduling python scripts on Windows systems. With MaCron, you can easily automate tasks such as backups, system maintenance, and data processing.
 
