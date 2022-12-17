@@ -3,51 +3,35 @@
 ![GitHub top language](https://img.shields.io/github/languages/top/Ma-Ko-Dev/MaCron?style=plastic)
 ![GitHub all releases](https://img.shields.io/github/downloads/Ma-Ko-Dev/MaCron/total?style=plastic)
 ![GitHub contributors](https://img.shields.io/github/contributors/Ma-Ko-Dev/Macron?style=plastic)
-<br>
-This tool lets you run and Schedule your Python Scripts right from your PC.
-<br>
-Check out the Flowchart folder for some more or less useful Flowcharts. They are from the very beginning and helped me visualize my ideas and the workflow.
-<br>
-<br>
-__This is a Work in Progress.__
-<br>
-Status: Prototyping
-<br>
-<br>
-Planned Features (so far):
-- GUI
-- Scheduling of Pythonscripts
-<br><br>
 
-Limitations:
-- Unknown for now
+MaCron is a simple, lightweight utility for scheduling tasks on Windows systems. With MaCron, you can easily automate tasks such as backups, system maintenance, and data processing.
 
-## Previews
-I added all the button functionality now. There was also some time to add the second color theme and the ooption to switch at any time.
-![Preview of Theme picker](GUI-Sketch/Qt-Preview5.PNG)
-<br>
-The GUI is now fully dynamic. It will only show entries that are in the database and shows their name. I also finished the Add Dialog Design. Also: the buttons start to get functional ;)
-<br>
-![Preview of dynamic GUI](GUI-Sketch/Qt-Preview4.PNG)
-<br>
-Latest Version of the GUI with QT. So far i am happy with it. I also changed the name because i am a comedy genius.
-<br>
-![Another GUI Preview with QT](GUI-Sketch/Qt-Preview2.PNG)
-![Menubar Preview with Icons](GUI-Sketch/Qt-Preview3.png)
-<br>
-This is the first test GUI with QT.
-<br>
-![First QT GUI Preview](GUI-Sketch/Qt-preview1.PNG)
-<br>
-First Iteration of the Main GUI (Mockup made with [draw.io](http://www.draw.io))
-<br>
-![First Main GUI Iteration](GUI-Sketch/GarryCron.drawio.png)
-<br>
-First Iteration of the Add GUI (Edit probably the same just with a different title and the Path already set.)
-<br>
-![First ADD GUI Iteration](GUI-Sketch/GarryCronAdd.drawio.png)
-<br><br><br><br>
-Menubar Icons by [Yusuke Kamiyamane.](https://p.yusukekamiyamane.com/)
-<br>
-Window Icon (The 2 Macarons) [Macaron stickers created by Gohsantosadrive - Flaticon](https://www.flaticon.com/free-stickers/macaron)</a>
+## Features
+
+- Easy to use: MaCron uses a simple, intuitive GUI for defining tasks and schedules.
+- Flexible scheduling: MaCron supports a wide range of scheduling times, including fixed intervals, and manual triggering.
+
+- Error handling: MaCron provides robust error handling and notification features to ensure that your tasks run smoothly.
+
+## Getting started
+
+To install MaCron, simply download the latest build from the release section.<br>
+Keep in mind that you need to have Python installed on your Machine. If the Scripts you are Scheduling with MaCron need non Built-In Modules, make sure that they are installed.
+
+## Known Issues
+For the moment, MaCron has no multiprocessing which means all scheduled scripts will run after each other. This can lead to some problems when the scheduled scripts take a long time to run. Please keep in mind that every sleep or delay in a script might freeze the GUI.<br>
+But don't worry, multiprocessing will be added soon.<br>
+The provided test scripts in the test_scripts folder might need additional Modules that are not listed in the requirements.txt file.
+
+## Contributions
+
+We welcome contributions to MaCron! If you have an idea for a new feature or a bug fix, please open an issue or a pull request. Before contributing, please read our contributor guidelines.
+
+## License
+
+MaCron is released under the MIT license.
+
+## Credits:
+- Menubar Icons by [Yusuke Kamiyamane.](https://p.yusukekamiyamane.com/)
+- Window Icon (The 2 Macarons) [Macaron stickers created by Gohsantosadrive - Flaticon](https://www.flaticon.com/free-stickers/macaron)</a>
 
