@@ -4,7 +4,7 @@
 ![GitHub all releases](https://img.shields.io/github/downloads/Ma-Ko-Dev/MaCron/total?style=plastic)
 ![GitHub contributors](https://img.shields.io/github/contributors/Ma-Ko-Dev/Macron?style=plastic)
 
-MaCron is a simple, lightweight utility for scheduling tasks on Windows systems. With MaCron, you can easily automate tasks such as backups, system maintenance, and data processing.
+MaCron is a simple, lightweight utility for scheduling python scripts on Windows systems. With MaCron, you can easily automate tasks such as backups, system maintenance, and data processing.
 
 ## Features
 
