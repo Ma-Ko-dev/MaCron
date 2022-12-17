@@ -29,7 +29,7 @@ We welcome contributions to MaCron! If you have an idea for a new feature or a b
 
 ## License
 
-MaCron is released under the [MIT license](LICENSE).
+MaCron is released under the "Unclear yet License :D".
 
 ## Credits:
 - Menubar Icons by [Yusuke Kamiyamane.](https://p.yusukekamiyamane.com/)
