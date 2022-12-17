@@ -28,6 +28,9 @@ API_URL = f"https://api.github.com/repos/{OWNER}/{REPO}/releases/latest"
 base = declarative_base()
 engine = create_engine("sqlite:///database.db")
 # logging setup
+if not os.path.exists("logs"):
+    os.makedirs("logs")
+
 logging.basicConfig(filename="logs/log.log", filemode="w", level=logging.DEBUG,
                     format="%(asctime)s|%(levelname)s|%(funcName)s|%(message)s",
                     datefmt="%d.%m.%Y-%H:%M:%S")
@@ -441,10 +444,6 @@ def create_default_ini():
 
 
 if __name__ == "__main__":
-    # check for log folder, create one if non is found
-    if not os.path.exists("logs"):
-        os.makedirs("logs")
-
     # check if ini file exists, call function to create default one
     if not os.path.exists("config.ini"):
         create_default_ini()

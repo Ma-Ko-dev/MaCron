@@ -16,7 +16,8 @@ MaCron is a simple, lightweight utility for scheduling tasks on Windows systems.
 ## Getting started
 
 To install MaCron, simply download the latest build from the release section.<br>
-Keep in mind that you need to have Python installed on your Machine. If the Scripts you are Scheduling with MaCron need non Built-In Modules, make sure that they are installed.
+Keep in mind that you need to have Python installed on your Machine. If the Scripts you are Scheduling with MaCron need non Built-In Modules, make sure that they are installed.<br>
+It is recommended to save your python scripts with the extension .pyw to suppress the popup of a cmd window.
 
 ## Known Issues
 For the moment, MaCron has no multiprocessing which means all scheduled scripts will run after each other. This can lead to some problems when the scheduled scripts take a long time to run. Please keep in mind that every sleep or delay in a script might freeze the GUI.<br>
