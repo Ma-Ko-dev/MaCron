@@ -25,11 +25,11 @@ The provided test scripts in the test_scripts folder might need additional Modul
 
 ## Contributions
 
-We welcome contributions to MaCron! If you have an idea for a new feature or a bug fix, please open an issue or a pull request. Before contributing, please read our contributor guidelines.
+We welcome contributions to MaCron! If you have an idea for a new feature or a bug fix, please open an issue or a pull request. Before contributing, please read our [contributor guidelines](CONTRIBUTING.md).
 
 ## License
 
-MaCron is released under the MIT license.
+MaCron is released under the [MIT license](LICENSE).
 
 ## Credits:
 - Menubar Icons by [Yusuke Kamiyamane.](https://p.yusukekamiyamane.com/)
