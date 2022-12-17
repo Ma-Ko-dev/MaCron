@@ -13,8 +13,8 @@ MaCron is a simple, lightweight utility for scheduling python scripts on Windows
 
 - Easy to use: MaCron uses a simple, intuitive GUI for defining tasks and schedules.
 - Flexible scheduling: MaCron supports a wide range of scheduling times, including fixed intervals, and manual triggering.
-
 - Error handling: MaCron provides robust error handling and notification features to ensure that your tasks run smoothly.
+- Minimizes to Tray and runs in the background.
 
 ## Getting started
 
