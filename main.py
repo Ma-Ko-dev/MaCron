@@ -37,6 +37,8 @@ logging.basicConfig(filename="logs/log.log", filemode="w", level=logging.DEBUG,
 
 
 def check_version():
+    """Calling GitHubs API to check for the latest release. Its its not the same as VERSION we alert the user that
+    there is a new Version available and open the default browser."""
     try:
         request_version = requests.get(API_URL).json()["tag_name"]
     except LookupError:
@@ -424,7 +426,6 @@ class AddDialog(QtWidgets.QDialog):
 
 class EntryWidget(QtWidgets.QWidget):
     """Acts as the entry for the main GUI"""
-
     def __init__(self, *args, **kwargs):
         super(EntryWidget, self).__init__(*args, **kwargs)
         self.entry_ui = entryWidget.Ui_Form()
@@ -432,7 +433,8 @@ class EntryWidget(QtWidgets.QWidget):
 
 
 def create_default_ini():
-    # creating an ini with some default values
+    """Creates a new default ini files. The default values are 'dark' for the dark theme and the current working
+    directory for the last used path so adding a script looks there first."""
     new_config = configparser.ConfigParser()
     # default theme is dark and the default value for the script path is the current working directory.
     new_config["MaCron Settings"] = {
