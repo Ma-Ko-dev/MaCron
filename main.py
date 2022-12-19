@@ -7,8 +7,6 @@ import qdarkstyle
 import logging
 import configparser
 import requests
-# winsound will later be used
-# import winsound
 
 from subprocess import run
 from sqlalchemy import Column, Integer, String, Float, create_engine
@@ -267,8 +265,7 @@ class MainWindow(QtWidgets.QMainWindow):
             logging.error(f"Manual run-> ID: {xid} | {path}\nReturncode: {e.returncode}, Output: {e.output}\n"
                           f"{e.stderr.decode('utf-8')}")
             self.notify_error = True
-            # Removed sound for now because it freezes the GUI
-            # winsound.PlaySound("SystemExclamation", winsound.SND_ALIAS)
+            QtWidgets.QApplication.beep()
         logging.info(f"Manual run-> ID: {xid} - Interval: {interval}")
         self.reset_next_run(xid, interval)
 
@@ -288,8 +285,7 @@ class MainWindow(QtWidgets.QMainWindow):
                         logging.error(f"Autorun-> ID: {macroni.id} | {macroni.path}\n {e.returncode}, Output: "
                                       f"{e.output}\n{e.stderr.decode('utf-8')}")
                         self.notify_error = True
-                        # Removed sound for now because it freezes the GUI
-                        # winsound.PlaySound("SystemExclamation", winsound.SND_ALIAS)
+                        QtWidgets.QApplication.beep()
                     logging.info(f"Autorun-> ID: {macroni.id} - Interval: {macroni.interval}")
                     self.reset_next_run(macroni.id, macroni.interval)
 
