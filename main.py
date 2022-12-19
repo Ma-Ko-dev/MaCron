@@ -35,7 +35,7 @@ logging.basicConfig(filename="logs/log.log", filemode="w", level=logging.DEBUG,
 
 
 def check_version():
-    """Calling GitHubs API to check for the latest release. Its its not the same as VERSION we alert the user that
+    """Calling GitHubs API to check for the latest release. Its it's not the same as VERSION we alert the user that
     there is a new Version available and open the default browser."""
     try:
         request_version = requests.get(API_URL).json()["tag_name"]
@@ -404,6 +404,7 @@ class AddDialog(QtWidgets.QDialog):
                 mainWin.add_entries_to_gui()
                 self.close()
         else:
+            # TODO: Change the Error message a bit so its clearer whats wrong
             icon = QtGui.QIcon()
             icon.addPixmap(QtGui.QPixmap(":/icons/assets/icons/macaron_flaticon-com.ico"))
 

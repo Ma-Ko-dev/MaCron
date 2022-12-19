@@ -59,6 +59,7 @@ class Ui_Dialog(object):
         self.lbl_mins.setObjectName("lbl_mins")
         self.horizontalLayout.addWidget(self.lbl_mins)
         self.spn_secs = QtWidgets.QSpinBox(Dialog)
+        self.spn_secs.setProperty("value", 60)
         self.spn_secs.setObjectName("spn_secs")
         self.horizontalLayout.addWidget(self.spn_secs)
         self.lbl_secs = QtWidgets.QLabel(Dialog)
