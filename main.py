@@ -69,6 +69,32 @@ class Macroni(base):
     next_run = Column(Float, nullable=False)
 
 
+class ExternalScriptThread(QtCore.QThread):
+    """External Thread Object to let Scripts run without freezing the GUI."""
+    script_finished = QtCore.pyqtSignal(bool)
+
+    def __init__(self, script_path, xid, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.script_path = script_path
+        self.xid = xid
+
+    def run(self):
+        """Runs the script which path we got when the Object created and handles errors if any will occur."""
+        try:
+            if os.path.splitext(self.script_path)[1] == ".py":  # type: ignore
+                run(["python", self.script_path], check=True, capture_output=True)
+            else:
+                run(["pythonw", self.script_path], check=True, capture_output=True)
+        except subprocess.CalledProcessError as e:
+            logging.error(f"Manual run-> ID: {self.xid} | {self.script_path}\nReturncode: {e.returncode}, Output: "
+                          f"{e.output}\n{e.stderr.decode('utf-8')}")
+            logging.debug("I am here before emit a signal")
+            QtWidgets.QApplication.beep()
+            self.script_finished.emit(True)
+        else:
+            self.script_finished.emit(False)
+
+
 class MainWindow(QtWidgets.QMainWindow):
     """Handles all MainWindow related tasks. It will create a window from UI.mainWindow which was created
     with the Qt Designer."""
@@ -133,6 +159,12 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.menu_action_update.triggered.connect(check_version)
         # Button connections
         self.ui.btn_addScript.clicked.connect(self.open_dialog)
+
+    def on_signal(self, notify):
+        """Reacts to the Signal emited from the external thread. If it sends True we had an error, and we will switch
+        the internal notify_error variable to True so the title will change."""
+        if notify:
+            self.notify_error = True
 
     def changeEvent(self, event) -> None:
         """Check if the event comes from minimizing and hides the window."""
@@ -256,16 +288,10 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def run_macroni_manual(self, path, xid, interval) -> None:
         """When called, it will run the script at <path> and calls reset_next_run() with <xid>, <interval>"""
-        try:
-            if os.path.splitext(path)[1] == ".py":  # type: ignore
-                run(["python", path], check=True, capture_output=True)
-            else:
-                run(["pythonw", path], check=True, capture_output=True)
-        except subprocess.CalledProcessError as e:
-            logging.error(f"Manual run-> ID: {xid} | {path}\nReturncode: {e.returncode}, Output: {e.output}\n"
-                          f"{e.stderr.decode('utf-8')}")
-            self.notify_error = True
-            QtWidgets.QApplication.beep()
+        thread = ExternalScriptThread(path, xid)
+        thread.script_finished.connect(self.on_signal)
+        thread.start()
+
         logging.info(f"Manual run-> ID: {xid} - Interval: {interval}")
         self.reset_next_run(xid, interval)
 
@@ -276,16 +302,9 @@ class MainWindow(QtWidgets.QMainWindow):
             macronis = session.query(Macroni).all()
             for macroni in macronis:
                 if datetime.datetime.now().timestamp() >= macroni.next_run:
-                    try:
-                        if os.path.splitext(macroni.path)[1] == ".py":  # type: ignore
-                            run(["python", macroni.path], check=True, capture_output=True)
-                        else:
-                            run(["pythonw", macroni.path], check=True, capture_output=True)
-                    except subprocess.CalledProcessError as e:
-                        logging.error(f"Autorun-> ID: {macroni.id} | {macroni.path}\n {e.returncode}, Output: "
-                                      f"{e.output}\n{e.stderr.decode('utf-8')}")
-                        self.notify_error = True
-                        QtWidgets.QApplication.beep()
+                    thread = ExternalScriptThread(macroni.path, macroni.id)
+                    thread.script_finished.connect(self.on_signal)
+                    thread.start()
                     logging.info(f"Autorun-> ID: {macroni.id} - Interval: {macroni.interval}")
                     self.reset_next_run(macroni.id, macroni.interval)
 
