@@ -10,29 +10,24 @@
 MaCron is a simple, lightweight utility for scheduling python scripts on Windows systems. With MaCron, you can easily automate tasks such as backups, system maintenance, and data processing.
 
 ## Features
-
 - Easy to use: MaCron uses a simple, intuitive GUI for defining tasks and schedules.
 - Flexible scheduling: MaCron supports a wide range of scheduling times, including fixed intervals, and manual triggering.
 - Error handling: MaCron provides robust error handling and notification features to ensure that your tasks run smoothly.
 - Minimizes to Tray and runs in the background.
+- Utilize Threads to ensure Scripts will run while the GUI is still responsive.
 
 ## Getting started
-
 To install MaCron, simply download the latest build from the release section.<br>
 Keep in mind that you need to have Python installed on your Machine. If the Scripts you are Scheduling with MaCron need non Built-In Modules, make sure that they are installed.<br>
 It is recommended to save your python scripts with the extension .pyw to suppress the popup of a cmd window.
 
 ## Known Issues
-For the moment, MaCron has no multiprocessing which means all scheduled scripts will run after each other. This can lead to some problems when the scheduled scripts take a long time to run. Please keep in mind that every sleep or delay in a script might freeze the GUI.<br>
-But don't worry, multiprocessing will be added soon.<br>
 The provided test scripts in the test_scripts folder might need additional Modules that are not listed in the requirements.txt file.
 
 ## Contributions
-
 I welcome contributions to MaCron! If you have an idea for a new feature or a bug fix, please open an issue or a pull request. Before contributing, please read our [contributor guidelines](CONTRIBUTING.md).
 
 ## License
-
 MaCron is released under the "Unclear yet License :D".
 
 ## Credits:

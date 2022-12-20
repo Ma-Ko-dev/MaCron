@@ -16,7 +16,7 @@ from UI import entryWidget, mainWindow, addDialog
 
 # configs
 MINIMUM_INTERVAL = 60
-VERSION = "v1.0.0"
+VERSION = "v1.1.0"
 HOMEPAGE = "https://github.com/Ma-Ko-dev/MaCron/releases"
 OWNER = "Ma-Ko-Dev"
 REPO = "MaCron"
