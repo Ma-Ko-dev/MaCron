@@ -464,9 +464,6 @@ if __name__ == "__main__":
     if not os.path.exists("config.ini"):
         create_default_ini()
 
-    # check version once
-    check_version()
-
     # creating configparser for future reference
     config = configparser.ConfigParser()
     config.read("config.ini")
@@ -475,6 +472,10 @@ if __name__ == "__main__":
     # basic gui setup
     base.metadata.create_all(engine)
     app = QtWidgets.QApplication([])
+
+    # check version once
+    check_version()
+
     mainWin = MainWindow()
 
     mainWin.show()
