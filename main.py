@@ -423,18 +423,16 @@ class AddDialog(QtWidgets.QDialog):
                 mainWin.add_entries_to_gui()
                 self.close()
         else:
-            # TODO: Change the Error message a bit so its clearer whats wrong
             icon = QtGui.QIcon()
             icon.addPixmap(QtGui.QPixmap(":/icons/assets/icons/macaron_flaticon-com.ico"))
 
             msg = QtWidgets.QMessageBox()
             msg.setWindowIcon(icon)
             msg.setIcon(QtWidgets.QMessageBox.Critical)
-            msg.setText("All fields are mandatory to fill!\nSee details for more Information.")
-            msg.setDetailedText("See below for more Information:\n"
-                                "The Path has to be filled with a valid Path to a Python file.\n"
-                                "The Name field has to be at least 6 chars long.\n"
-                                "The minimum Interval is 60 seconds.")
+            msg.setText("All fields are mandatory to fill! Please see below for more Information.")
+            msg.setInformativeText("The Path has to be a valid path to a Python script and can't be empty.\n"
+                                   "The Name field can't be empty and has to be at least 6 chars long.\n"
+                                   "The minimum Interval is 60 Seconds. This is also the default value.")
             msg.setWindowTitle("ERROR")
             msg.setStandardButtons(QtWidgets.QMessageBox.Ok)
             msg.exec_()
